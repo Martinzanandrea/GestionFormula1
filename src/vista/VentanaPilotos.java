@@ -5,7 +5,6 @@ import modelo.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -245,31 +244,8 @@ public class VentanaPilotos extends JFrame {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         scrollPane.getViewport().setBackground(Color.WHITE);
 
-        // Panel de búsqueda
-        JPanel panelBusqueda = crearPanelBusqueda();
-
         panel.add(titulo, BorderLayout.NORTH);
-        panel.add(panelBusqueda, BorderLayout.CENTER);
-        panel.add(scrollPane, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    /**
-     * Crea panel de búsqueda
-     */
-    private JPanel crearPanelBusqueda() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBackground(new Color(248, 249, 250));
-
-        JLabel lblBuscar = new JLabel("🔍 Buscar:");
-        lblBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-
-        JTextField txtBuscar = crearCampoTexto();
-        txtBuscar.setPreferredSize(new Dimension(200, 30));
-
-        panel.add(lblBuscar);
-        panel.add(txtBuscar);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }
@@ -290,7 +266,7 @@ public class VentanaPilotos extends JFrame {
         tablaPilotos.getTableHeader().setForeground(new Color(52, 58, 64));
         tablaPilotos.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(220, 220, 220)));
 
-        // Renderer personalizado para colores por escudería
+        // Renderer personalizado
         tablaPilotos.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -298,7 +274,6 @@ public class VentanaPilotos extends JFrame {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (!isSelected) {
-                    // Colores alternos
                     if (row % 2 == 0) {
                         c.setBackground(Color.WHITE);
                     } else {
@@ -313,150 +288,110 @@ public class VentanaPilotos extends JFrame {
         tablaPilotos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    add(panelPrincipal);
-    }
-
     /**
-     * Crea el panel de formulario para agregar/editar pilotos
+     * Crea panel de información del piloto seleccionado
      */
-    private JPanel crearPanelFormulario() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Datos del Piloto"));
+    private JPanel crearPanelInformacion() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setPreferredSize(new Dimension(280, 0));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        // Título
+        JLabel titulo = new JLabel("📊 Información del Piloto");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titulo.setForeground(new Color(52, 58, 64));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        // Campos del formulario
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Nombre:"), gbc);
-        gbc.gridx = 1;
-        txtNombre = new JTextField(15);
-        panel.add(txtNombre, gbc);
+        // Imagen placeholder
+        lblImagenPiloto = new JLabel("👤", JLabel.CENTER);
+        lblImagenPiloto.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 60));
+        lblImagenPiloto.setPreferredSize(new Dimension(120, 120));
+        lblImagenPiloto.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
-        gbc.gridx = 2;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Apellido:"), gbc);
-        gbc.gridx = 3;
-        txtApellido = new JTextField(15);
-        panel.add(txtApellido, gbc);
+        // Panel de estadísticas
+        lblEstadisticas = new JLabel("<html><center>Selecciona un piloto<br>para ver sus estadísticas</center></html>");
+        lblEstadisticas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblEstadisticas.setForeground(new Color(108, 117, 125));
+        lblEstadisticas.setHorizontalAlignment(JLabel.CENTER);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(new JLabel("Edad:"), gbc);
-        gbc.gridx = 1;
-        txtEdad = new JTextField(15);
-        panel.add(txtEdad, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        panel.add(new JLabel("Nacionalidad:"), gbc);
-        gbc.gridx = 3;
-        txtNacionalidad = new JTextField(15);
-        panel.add(txtNacionalidad, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(new JLabel("Número:"), gbc);
-        gbc.gridx = 1;
-        txtNumero = new JTextField(15);
-        panel.add(txtNumero, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 2;
-        panel.add(new JLabel("Experiencia (años):"), gbc);
-        gbc.gridx = 3;
-        txtExperiencia = new JTextField(15);
-        panel.add(txtExperiencia, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(new JLabel("Escudería:"), gbc);
-        gbc.gridx = 1;
-        comboEscuderias = new JComboBox<>();
-        panel.add(comboEscuderias, gbc);
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(lblImagenPiloto, BorderLayout.CENTER);
+        panel.add(lblEstadisticas, BorderLayout.SOUTH);
 
         return panel;
     }
 
     /**
-     * Crea el panel de tabla para mostrar los pilotos
+     * Crea panel de botones principales
      */
-    private JPanel crearPanelTabla() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Lista de Pilotos"));
+    private JPanel crearPanelBotones() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        panel.setBackground(new Color(248, 249, 250));
 
-        // Crear modelo de tabla
-        String[] columnas = { "Número", "Nombre", "Apellido", "Edad", "Nacionalidad", "Experiencia", "Escudería",
-                "Puntos" };
-        modeloTabla = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Hacer la tabla no editable
-            }
-        };
+        btnEliminar = crearBoton("🗑️ Eliminar", new Color(220, 53, 69));
+        JButton btnActualizar = crearBoton("🔄 Actualizar", new Color(108, 117, 125));
+        JButton btnCerrar = crearBoton("❌ Cerrar", new Color(134, 142, 150));
 
-        tablaPilotos = new JTable(modeloTabla);
-        tablaPilotos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        panel.add(btnEliminar);
+        panel.add(btnActualizar);
+        panel.add(btnCerrar);
 
-        // Agregar listener para selección
+        // Eventos
+        btnActualizar.addActionListener(e -> cargarDatos());
+        btnCerrar.addActionListener(e -> dispose());
+
+        return panel;
+    }
+
+    /**
+     * Configura los eventos de la interfaz
+     */
+    private void configurarEventos() {
+        // Eventos de botones del formulario
+        btnAgregar.addActionListener(e -> agregarPiloto());
+        btnModificar.addActionListener(e -> modificarPiloto());
+        btnLimpiar.addActionListener(e -> limpiarFormulario());
+        btnEliminar.addActionListener(e -> eliminarPiloto());
+
+        // Evento de selección en tabla
         tablaPilotos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                cargarPilotoSeleccionado();
+                seleccionarPiloto();
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(tablaPilotos);
-        scrollPane.setPreferredSize(new Dimension(800, 300));
-
-        panel.add(scrollPane, BorderLayout.CENTER);
-        return panel;
-    }
-
-    /**
-     * Crea el panel de botones
-     */
-    private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout());
-
-        JButton btnAgregar = new JButton("Agregar");
-        JButton btnModificar = new JButton("Modificar");
-        JButton btnEliminar = new JButton("Eliminar");
-        JButton btnLimpiar = new JButton("Limpiar");
-        JButton btnCerrar = new JButton("Cerrar");
-
-        // Agregar listeners
-        btnAgregar.addActionListener(e -> agregarPiloto());
-        btnModificar.addActionListener(e -> modificarPiloto());
-        btnEliminar.addActionListener(e -> eliminarPiloto());
-        btnLimpiar.addActionListener(e -> limpiarFormulario());
-        btnCerrar.addActionListener(e -> dispose());
-
-        panel.add(btnAgregar);
-        panel.add(btnModificar);
-        panel.add(btnEliminar);
-        panel.add(btnLimpiar);
-        panel.add(btnCerrar);
-
-        return panel;
+        // Doble clic en tabla para editar
+        tablaPilotos.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    seleccionarPiloto();
+                }
+            }
+        });
     }
 
     /**
      * Configura la ventana
      */
     private void configurarVentana() {
-        setTitle("Gestión de Pilotos");
-        setSize(900, 600);
+        setTitle("🏎️ Gestión de Pilotos - Sistema F1");
+        setSize(1200, 700);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setResizable(true);
     }
 
     /**
-     * Carga los datos iniciales
+     * Carga los datos en la tabla y combos
      */
     private void cargarDatos() {
         cargarEscuderias();
-        actualizarTablaPilotos();
+        actualizarTabla();
     }
 
     /**
@@ -471,45 +406,22 @@ public class VentanaPilotos extends JFrame {
     }
 
     /**
-     * Actualiza la tabla de pilotos
+     * Actualiza la tabla con los pilotos
      */
-    private void actualizarTablaPilotos() {
+    private void actualizarTabla() {
         modeloTabla.setRowCount(0);
         for (Piloto piloto : gestor.getPilotos()) {
             Object[] fila = {
                     piloto.getNumero(),
-                    piloto.getNombre(),
-                    piloto.getApellido(),
+                    piloto.getNombreCompleto(),
                     piloto.getEdad(),
                     piloto.getNacionalidad(),
-                    piloto.getExperiencia(),
+                    piloto.getNumero(),
                     piloto.getEscuderia() != null ? piloto.getEscuderia().getNombre() : "Sin escudería",
-                    piloto.getPuntosTotales()
+                    piloto.getPuntosTotales(),
+                    piloto.getExperiencia()
             };
             modeloTabla.addRow(fila);
-        }
-    }
-
-    /**
-     * Carga los datos del piloto seleccionado en el formulario
-     */
-    private void cargarPilotoSeleccionado() {
-        int filaSeleccionada = tablaPilotos.getSelectedRow();
-        if (filaSeleccionada >= 0) {
-            int numero = (Integer) modeloTabla.getValueAt(filaSeleccionada, 0);
-            Piloto piloto = gestor.getPilotos().stream()
-                    .filter(p -> p.getNumero() == numero)
-                    .findFirst().orElse(null);
-
-            if (piloto != null) {
-                txtNombre.setText(piloto.getNombre());
-                txtApellido.setText(piloto.getApellido());
-                txtEdad.setText(String.valueOf(piloto.getEdad()));
-                txtNacionalidad.setText(piloto.getNacionalidad());
-                txtNumero.setText(String.valueOf(piloto.getNumero()));
-                txtExperiencia.setText(String.valueOf(piloto.getExperiencia()));
-                comboEscuderias.setSelectedItem(piloto.getEscuderia());
-            }
         }
     }
 
@@ -526,28 +438,27 @@ public class VentanaPilotos extends JFrame {
             String nacionalidad = txtNacionalidad.getText().trim();
             int numero = Integer.parseInt(txtNumero.getText().trim());
             int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
+            Escuderia escuderia = (Escuderia) comboEscuderias.getSelectedItem();
 
             Piloto nuevoPiloto = new Piloto(nombre, apellido, edad, nacionalidad, numero, experiencia);
+            if (escuderia != null) {
+                nuevoPiloto.setEscuderia(escuderia);
+            }
 
             gestor.registrarPiloto(nuevoPiloto);
 
-            // Asignar escudería si se seleccionó
-            Escuderia escuderiaSeleccionada = (Escuderia) comboEscuderias.getSelectedItem();
-            if (escuderiaSeleccionada != null) {
-                gestor.asignarPilotoAEscuderia(nuevoPiloto, escuderiaSeleccionada);
-            }
-
-            actualizarTablaPilotos();
+            actualizarTabla();
             limpiarFormulario();
 
-            JOptionPane.showMessageDialog(this, "Piloto agregado exitosamente", "Éxito",
+            JOptionPane.showMessageDialog(this,
+                    "✅ Piloto agregado exitosamente",
+                    "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
-                    JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al agregar piloto: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ Error al agregar piloto: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -556,9 +467,10 @@ public class VentanaPilotos extends JFrame {
      * Modifica el piloto seleccionado
      */
     private void modificarPiloto() {
-        int filaSeleccionada = tablaPilotos.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un piloto para modificar", "Advertencia",
+        if (pilotoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione un piloto para modificar",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -566,51 +478,26 @@ public class VentanaPilotos extends JFrame {
         try {
             validarCampos();
 
-            int numero = (Integer) modeloTabla.getValueAt(filaSeleccionada, 0);
-            Piloto piloto = gestor.getPilotos().stream()
-                    .filter(p -> p.getNumero() == numero)
-                    .findFirst().orElse(null);
+            pilotoSeleccionado.setNombre(txtNombre.getText().trim());
+            pilotoSeleccionado.setApellido(txtApellido.getText().trim());
+            pilotoSeleccionado.setEdad(Integer.parseInt(txtEdad.getText().trim()));
+            pilotoSeleccionado.setNacionalidad(txtNacionalidad.getText().trim());
+            pilotoSeleccionado.setNumero(Integer.parseInt(txtNumero.getText().trim()));
+            pilotoSeleccionado.setExperiencia(Integer.parseInt(txtExperiencia.getText().trim()));
+            pilotoSeleccionado.setEscuderia((Escuderia) comboEscuderias.getSelectedItem());
 
-            if (piloto != null) {
-                piloto.setNombre(txtNombre.getText().trim());
-                piloto.setApellido(txtApellido.getText().trim());
-                piloto.setEdad(Integer.parseInt(txtEdad.getText().trim()));
-                piloto.setNacionalidad(txtNacionalidad.getText().trim());
-                piloto.setExperiencia(Integer.parseInt(txtExperiencia.getText().trim()));
+            actualizarTabla();
+            limpiarFormulario();
 
-                // Verificar cambio de número
-                int nuevoNumero = Integer.parseInt(txtNumero.getText().trim());
-                if (nuevoNumero != piloto.getNumero()) {
-                    // Verificar que el nuevo número no esté ocupado
-                    boolean numeroOcupado = gestor.getPilotos().stream()
-                            .anyMatch(p -> p.getNumero() == nuevoNumero);
-                    if (numeroOcupado) {
-                        throw new IllegalArgumentException("El número " + nuevoNumero + " ya está ocupado");
-                    }
-                    piloto.setNumero(nuevoNumero);
-                }
+            JOptionPane.showMessageDialog(this,
+                    "✅ Piloto modificado exitosamente",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
 
-                // Manejar cambio de escudería
-                Escuderia nuevaEscuderia = (Escuderia) comboEscuderias.getSelectedItem();
-                if (piloto.getEscuderia() != nuevaEscuderia) {
-                    if (piloto.getEscuderia() != null) {
-                        piloto.getEscuderia().removerPiloto(piloto);
-                    }
-                    if (nuevaEscuderia != null) {
-                        gestor.asignarPilotoAEscuderia(piloto, nuevaEscuderia);
-                    }
-                }
-
-                actualizarTablaPilotos();
-                JOptionPane.showMessageDialog(this, "Piloto modificado exitosamente", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
-                    JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al modificar piloto: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ Error al modificar piloto: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -621,7 +508,9 @@ public class VentanaPilotos extends JFrame {
     private void eliminarPiloto() {
         int filaSeleccionada = tablaPilotos.getSelectedRow();
         if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un piloto para eliminar", "Advertencia",
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione un piloto para eliminar",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -629,17 +518,75 @@ public class VentanaPilotos extends JFrame {
         int confirmacion = JOptionPane.showConfirmDialog(this,
                 "¿Está seguro que desea eliminar este piloto?",
                 "Confirmar eliminación",
-                JOptionPane.YES_NO_OPTION);
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
         if (confirmacion == JOptionPane.YES_OPTION) {
-            int numero = (Integer) modeloTabla.getValueAt(filaSeleccionada, 0);
-            gestor.getPilotos().removeIf(p -> p.getNumero() == numero);
-            actualizarTablaPilotos();
-            limpiarFormulario();
+            String nombrePiloto = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
+            Piloto piloto = gestor.getPilotos().stream()
+                    .filter(p -> p.getNombreCompleto().equals(nombrePiloto))
+                    .findFirst().orElse(null);
 
-            JOptionPane.showMessageDialog(this, "Piloto eliminado exitosamente", "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE);
+            if (piloto != null) {
+                gestor.getPilotos().remove(piloto);
+                actualizarTabla();
+                limpiarFormulario();
+
+                JOptionPane.showMessageDialog(this,
+                        "✅ Piloto eliminado exitosamente",
+                        "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
         }
+    }
+
+    /**
+     * Selecciona un piloto de la tabla
+     */
+    private void seleccionarPiloto() {
+        int filaSeleccionada = tablaPilotos.getSelectedRow();
+        if (filaSeleccionada >= 0) {
+            String nombrePiloto = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
+            pilotoSeleccionado = gestor.getPilotos().stream()
+                    .filter(p -> p.getNombreCompleto().equals(nombrePiloto))
+                    .findFirst().orElse(null);
+
+            if (pilotoSeleccionado != null) {
+                cargarDatosPiloto(pilotoSeleccionado);
+                mostrarEstadisticasPiloto(pilotoSeleccionado);
+            }
+        }
+    }
+
+    /**
+     * Carga los datos del piloto en el formulario
+     */
+    private void cargarDatosPiloto(Piloto piloto) {
+        txtNombre.setText(piloto.getNombre());
+        txtApellido.setText(piloto.getApellido());
+        txtEdad.setText(String.valueOf(piloto.getEdad()));
+        txtNacionalidad.setText(piloto.getNacionalidad());
+        txtNumero.setText(String.valueOf(piloto.getNumero()));
+        txtExperiencia.setText(String.valueOf(piloto.getExperiencia()));
+        comboEscuderias.setSelectedItem(piloto.getEscuderia());
+    }
+
+    /**
+     * Muestra las estadísticas del piloto seleccionado
+     */
+    private void mostrarEstadisticasPiloto(Piloto piloto) {
+        StringBuilder stats = new StringBuilder("<html><div style='text-align: center;'>");
+        stats.append("<b>").append(piloto.getNombreCompleto()).append("</b><br>");
+        stats.append("Número: #").append(piloto.getNumero()).append("<br>");
+        stats.append("Puntos: ").append(piloto.getPuntosTotales()).append("<br>");
+        stats.append("Experiencia: ").append(piloto.getExperiencia()).append(" años<br>");
+
+        if (piloto.getEscuderia() != null) {
+            stats.append("Escudería: ").append(piloto.getEscuderia().getNombre()).append("<br>");
+        }
+
+        stats.append("</div></html>");
+        lblEstadisticas.setText(stats.toString());
     }
 
     /**
@@ -653,7 +600,10 @@ public class VentanaPilotos extends JFrame {
         txtNumero.setText("");
         txtExperiencia.setText("");
         comboEscuderias.setSelectedIndex(0);
+        pilotoSeleccionado = null;
         tablaPilotos.clearSelection();
+
+        lblEstadisticas.setText("<html><center>Selecciona un piloto<br>para ver sus estadísticas</center></html>");
     }
 
     /**
@@ -675,19 +625,26 @@ public class VentanaPilotos extends JFrame {
             if (edad < 18 || edad > 50) {
                 throw new IllegalArgumentException("La edad debe estar entre 18 y 50 años");
             }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("La edad debe ser un número válido");
+        }
 
+        try {
             int numero = Integer.parseInt(txtNumero.getText().trim());
             if (numero < 1 || numero > 99) {
                 throw new IllegalArgumentException("El número debe estar entre 1 y 99");
             }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El número debe ser válido");
+        }
 
+        try {
             int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
             if (experiencia < 0) {
-                throw new IllegalArgumentException("La experiencia no puede ser negativa");
+                throw new IllegalArgumentException("Los años de experiencia no pueden ser negativos");
             }
-
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Los campos numéricos deben contener valores válidos");
+            throw new IllegalArgumentException("Los años de experiencia deben ser un número válido");
         }
     }
 }
