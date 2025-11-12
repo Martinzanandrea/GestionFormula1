@@ -4,10 +4,14 @@ import controlador.GestorFormula1;
 import modelo.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
- * Ventana para la gestión de pilotos
+ * Ventana moderna e intuitiva para la gestión de pilotos
  */
 public class VentanaPilotos extends JFrame {
     private GestorFormula1 gestor;
@@ -15,42 +19,301 @@ public class VentanaPilotos extends JFrame {
     private DefaultTableModel modeloTabla;
     private JTextField txtNombre, txtApellido, txtEdad, txtNacionalidad, txtNumero, txtExperiencia;
     private JComboBox<Escuderia> comboEscuderias;
+    private JLabel lblImagenPiloto, lblEstadisticas;
+    private Piloto pilotoSeleccionado;
+    private JButton btnAgregar, btnModificar, btnEliminar, btnLimpiar;
 
     /**
      * Constructor de la ventana de pilotos
-     * 
-     * @param gestor Gestor principal del sistema
      */
     public VentanaPilotos(GestorFormula1 gestor) {
         this.gestor = gestor;
         inicializarComponentes();
         configurarVentana();
         cargarDatos();
+        configurarEventos();
     }
 
     /**
-     * Inicializa los componentes de la interfaz
+     * Inicializa los componentes con diseño moderno
      */
     private void inicializarComponentes() {
         setLayout(new BorderLayout());
 
-        // Panel principal
+        // Panel principal con fondo
         JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBackground(new Color(248, 249, 250));
 
-        // Panel de formulario
-        JPanel panelFormulario = crearPanelFormulario();
+        // Crear paneles principales
+        JPanel panelIzquierdo = crearPanelFormulario();
+        JPanel panelCentro = crearPanelTabla();
+        JPanel panelDerecho = crearPanelInformacion();
+        JPanel panelInferior = crearPanelBotones();
 
-        // Panel de tabla
-        JPanel panelTabla = crearPanelTabla();
-
-        // Panel de botones
-        JPanel panelBotones = crearPanelBotones();
-
-        panelPrincipal.add(panelFormulario, BorderLayout.NORTH);
-        panelPrincipal.add(panelTabla, BorderLayout.CENTER);
-        panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
+        // Layout con proporciones
+        panelPrincipal.add(panelIzquierdo, BorderLayout.WEST);
+        panelPrincipal.add(panelCentro, BorderLayout.CENTER);
+        panelPrincipal.add(panelDerecho, BorderLayout.EAST);
+        panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
         add(panelPrincipal);
+    }
+
+    /**
+     * Crea el panel de formulario con diseño moderno
+     */
+    private JPanel crearPanelFormulario() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setPreferredSize(new Dimension(320, 0));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
+
+        // Título del formulario
+        JLabel titulo = new JLabel("👨‍✈️ Datos del Piloto");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titulo.setForeground(new Color(52, 58, 64));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+        // Panel de formulario con GridBagLayout
+        JPanel panelCampos = new JPanel(new GridBagLayout());
+        panelCampos.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // Configurar campos de entrada
+        txtNombre = crearCampoTexto();
+        txtApellido = crearCampoTexto();
+        txtEdad = crearCampoTexto();
+        txtNacionalidad = crearCampoTexto();
+        txtNumero = crearCampoTexto();
+        txtExperiencia = crearCampoTexto();
+
+        comboEscuderias = new JComboBox<>();
+        comboEscuderias.setPreferredSize(new Dimension(200, 35));
+        comboEscuderias.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        comboEscuderias.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(206, 212, 218)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+
+        // Agregar campos al formulario
+        gbc.insets = new Insets(8, 0, 8, 0);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        agregarCampo(panelCampos, "Nombre:", txtNombre, 0, gbc);
+        agregarCampo(panelCampos, "Apellido:", txtApellido, 1, gbc);
+        agregarCampo(panelCampos, "Edad:", txtEdad, 2, gbc);
+        agregarCampo(panelCampos, "Nacionalidad:", txtNacionalidad, 3, gbc);
+        agregarCampo(panelCampos, "Número:", txtNumero, 4, gbc);
+        agregarCampo(panelCampos, "Años Exp.:", txtExperiencia, 5, gbc);
+
+        gbc.gridy = 6;
+        gbc.gridx = 0;
+        JLabel lblEscuderia = crearEtiqueta("Escudería:");
+        panelCampos.add(lblEscuderia, gbc);
+        gbc.gridx = 1;
+        panelCampos.add(comboEscuderias, gbc);
+
+        // Panel de botones del formulario
+        JPanel panelBotonesForm = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        panelBotonesForm.setBackground(Color.WHITE);
+
+        btnAgregar = crearBoton("➕ Agregar", new Color(40, 167, 69));
+        btnModificar = crearBoton("✏️ Modificar", new Color(0, 123, 255));
+        btnLimpiar = crearBoton("🧹 Limpiar", new Color(108, 117, 125));
+
+        panelBotonesForm.add(btnAgregar);
+        panelBotonesForm.add(btnModificar);
+        panelBotonesForm.add(btnLimpiar);
+
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(panelCampos, BorderLayout.CENTER);
+        panel.add(panelBotonesForm, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    /**
+     * Helper para agregar campos al formulario
+     */
+    private void agregarCampo(JPanel panel, String etiqueta, JTextField campo, int fila, GridBagConstraints gbc) {
+        gbc.gridy = fila;
+        gbc.gridx = 0;
+        JLabel lbl = crearEtiqueta(etiqueta);
+        panel.add(lbl, gbc);
+
+        gbc.gridx = 1;
+        panel.add(campo, gbc);
+    }
+
+    /**
+     * Crea etiquetas con estilo consistente
+     */
+    private JLabel crearEtiqueta(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        label.setForeground(new Color(73, 80, 87));
+        label.setPreferredSize(new Dimension(80, 25));
+        return label;
+    }
+
+    /**
+     * Crea campos de texto con estilo moderno
+     */
+    private JTextField crearCampoTexto() {
+        JTextField campo = new JTextField();
+        campo.setPreferredSize(new Dimension(200, 35));
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        campo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(206, 212, 218)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+
+        // Efectos focus
+        campo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                campo.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(0, 123, 255), 2),
+                        BorderFactory.createEmptyBorder(4, 9, 4, 9)));
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                campo.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(206, 212, 218)),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+            }
+        });
+
+        return campo;
+    }
+
+    /**
+     * Crea botones con estilo moderno
+     */
+    private JButton crearBoton(String texto, Color color) {
+        JButton boton = new JButton(texto);
+        boton.setPreferredSize(new Dimension(90, 35));
+        boton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        boton.setBackground(color);
+        boton.setForeground(Color.WHITE);
+        boton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        boton.setFocusPainted(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Efectos hover
+        boton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                boton.setBackground(color.darker());
+            }
+
+            public void mouseExited(MouseEvent e) {
+                boton.setBackground(color);
+            }
+        });
+
+        return boton;
+    }
+
+    /**
+     * Crea el panel de tabla con diseño mejorado
+     */
+    private JPanel crearPanelTabla() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(248, 249, 250));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
+
+        // Título de la sección
+        JLabel titulo = new JLabel("🏁 Lista de Pilotos Registrados");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titulo.setForeground(new Color(52, 58, 64));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        // Configurar tabla
+        String[] columnas = { "#", "Nombre Completo", "Edad", "Nacionalidad", "Número", "Escudería", "Puntos",
+                "Experiencia" };
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        tablaPilotos = new JTable(modeloTabla);
+        configurarTabla();
+
+        JScrollPane scrollPane = new JScrollPane(tablaPilotos);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        // Panel de búsqueda
+        JPanel panelBusqueda = crearPanelBusqueda();
+
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(panelBusqueda, BorderLayout.CENTER);
+        panel.add(scrollPane, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    /**
+     * Crea panel de búsqueda
+     */
+    private JPanel crearPanelBusqueda() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBackground(new Color(248, 249, 250));
+
+        JLabel lblBuscar = new JLabel("🔍 Buscar:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+        JTextField txtBuscar = crearCampoTexto();
+        txtBuscar.setPreferredSize(new Dimension(200, 30));
+
+        panel.add(lblBuscar);
+        panel.add(txtBuscar);
+
+        return panel;
+    }
+
+    /**
+     * Configura la apariencia de la tabla
+     */
+    private void configurarTabla() {
+        tablaPilotos.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaPilotos.setRowHeight(30);
+        tablaPilotos.setGridColor(new Color(233, 236, 239));
+        tablaPilotos.setSelectionBackground(new Color(0, 123, 255, 30));
+        tablaPilotos.setSelectionForeground(new Color(52, 58, 64));
+
+        // Header personalizado
+        tablaPilotos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaPilotos.getTableHeader().setBackground(new Color(248, 249, 250));
+        tablaPilotos.getTableHeader().setForeground(new Color(52, 58, 64));
+        tablaPilotos.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(220, 220, 220)));
+
+        // Renderer personalizado para colores por escudería
+        tablaPilotos.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    // Colores alternos
+                    if (row % 2 == 0) {
+                        c.setBackground(Color.WHITE);
+                    } else {
+                        c.setBackground(new Color(248, 249, 250));
+                    }
+                }
+
+                return c;
+            }
+        });
+
+        tablaPilotos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    add(panelPrincipal);
     }
 
     /**
