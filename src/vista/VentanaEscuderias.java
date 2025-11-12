@@ -139,6 +139,10 @@ public class VentanaEscuderias extends JFrame {
         JButton btnAgregarPiloto = new JButton("Agregar");
         JButton btnRemoverPiloto = new JButton("Remover");
 
+        // Aplicar estilos a los botones pequeños
+        aplicarEstiloBotonPequeno(btnAgregarPiloto);
+        aplicarEstiloBotonPequeno(btnRemoverPiloto);
+
         btnAgregarPiloto.addActionListener(e -> agregarPilotoAEscuderia());
         btnRemoverPiloto.addActionListener(e -> removerPilotoDeEscuderia());
 
@@ -162,6 +166,10 @@ public class VentanaEscuderias extends JFrame {
         JPanel panelBotonesAutos = new JPanel(new FlowLayout());
         JButton btnAgregarAuto = new JButton("Agregar");
         JButton btnRemoverAuto = new JButton("Remover");
+
+        // Aplicar estilos a los botones pequeños
+        aplicarEstiloBotonPequeno(btnAgregarAuto);
+        aplicarEstiloBotonPequeno(btnRemoverAuto);
 
         btnAgregarAuto.addActionListener(e -> agregarAutoAEscuderia());
         btnRemoverAuto.addActionListener(e -> removerAutoDeEscuderia());
@@ -187,6 +195,10 @@ public class VentanaEscuderias extends JFrame {
         JButton btnAgregarMecanico = new JButton("Agregar");
         JButton btnRemoverMecanico = new JButton("Remover");
 
+        // Aplicar estilos a los botones pequeños
+        aplicarEstiloBotonPequeno(btnAgregarMecanico);
+        aplicarEstiloBotonPequeno(btnRemoverMecanico);
+
         btnAgregarMecanico.addActionListener(e -> agregarMecanicoAEscuderia());
         btnRemoverMecanico.addActionListener(e -> removerMecanicoDeEscuderia());
 
@@ -207,13 +219,20 @@ public class VentanaEscuderias extends JFrame {
      * Crea el panel de botones principales
      */
     private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout());
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnAgregar = new JButton("Agregar Escudería");
         JButton btnModificar = new JButton("Modificar");
         JButton btnEliminar = new JButton("Eliminar");
         JButton btnLimpiar = new JButton("Limpiar");
         JButton btnCerrar = new JButton("Cerrar");
+
+        // Aplicar estilos simples a los botones
+        aplicarEstiloBoton(btnAgregar);
+        aplicarEstiloBoton(btnModificar);
+        aplicarEstiloBoton(btnEliminar);
+        aplicarEstiloBoton(btnLimpiar);
+        aplicarEstiloBoton(btnCerrar);
 
         btnAgregar.addActionListener(e -> agregarEscuderia());
         btnModificar.addActionListener(e -> modificarEscuderia());
@@ -619,5 +638,27 @@ public class VentanaEscuderias extends JFrame {
         if (comboPaises.getSelectedItem() == null) {
             throw new IllegalArgumentException("Debe seleccionar un país");
         }
+    }
+
+    /**
+     * Aplica estilo moderno a los botones con alta visibilidad
+     */
+    private void aplicarEstiloBoton(JButton boton) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
+    }
+
+    /**
+     * Aplica estilo simple a botones pequeños
+     */
+    private void aplicarEstiloBotonPequeno(JButton boton) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }

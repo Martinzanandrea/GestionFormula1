@@ -76,6 +76,10 @@ public class VentanaReportes extends JFrame {
         JButton btnActualizar = new JButton("Actualizar Rankings");
         JButton btnExportar = new JButton("Exportar");
 
+        // Aplicar estilos a los botones
+        aplicarEstiloBoton(btnActualizar);
+        aplicarEstiloBoton(btnExportar);
+
         panelControles.add(btnActualizar);
         panelControles.add(btnExportar);
 
@@ -150,6 +154,9 @@ public class VentanaReportes extends JFrame {
         JComboBox<Piloto> comboPilotos = new JComboBox<>();
         JButton btnMostrarStats = new JButton("Mostrar Estadísticas");
 
+        // Aplicar estilo al botón
+        aplicarEstiloBoton(btnMostrarStats);
+
         for (Piloto piloto : gestor.getPilotos()) {
             comboPilotos.addItem(piloto);
         }
@@ -210,6 +217,9 @@ public class VentanaReportes extends JFrame {
 
         JComboBox<Escuderia> comboEscuderias = new JComboBox<>();
         JButton btnMostrarStats = new JButton("Mostrar Estadísticas");
+
+        // Aplicar estilo al botón
+        aplicarEstiloBoton(btnMostrarStats);
 
         for (Escuderia escuderia : gestor.getEscuderias()) {
             comboEscuderias.addItem(escuderia);
@@ -286,6 +296,10 @@ public class VentanaReportes extends JFrame {
         JButton btnActualizar = new JButton("Actualizar");
         JButton btnVerDetalles = new JButton("Ver Detalles");
 
+        // Aplicar estilos a los botones
+        aplicarEstiloBoton(btnActualizar);
+        aplicarEstiloBoton(btnVerDetalles);
+
         panelControles.add(btnActualizar);
         panelControles.add(btnVerDetalles);
 
@@ -339,6 +353,10 @@ public class VentanaReportes extends JFrame {
         // Panel de controles
         JPanel panelControles = new JPanel(new FlowLayout());
         JButton btnActualizar = new JButton("Actualizar Estadísticas");
+
+        // Aplicar estilo al botón
+        aplicarEstiloBoton(btnActualizar);
+
         panelControles.add(btnActualizar);
 
         // Panel principal con estadísticas
@@ -412,6 +430,10 @@ public class VentanaReportes extends JFrame {
         JPanel panel = new JPanel(new FlowLayout());
 
         JButton btnCerrar = new JButton("Cerrar");
+
+        // Aplicar estilo al botón
+        aplicarEstiloBoton(btnCerrar);
+
         btnCerrar.addActionListener(e -> dispose());
 
         panel.add(btnCerrar);
@@ -960,5 +982,16 @@ public class VentanaReportes extends JFrame {
                     "Detalles - " + nombreCarrera,
                     JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    /**
+     * Aplica estilo moderno a los botones con alta visibilidad
+     */
+    private void aplicarEstiloBoton(JButton boton) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }

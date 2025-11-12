@@ -1,10 +1,12 @@
 package vista;
 
 import controlador.GestorFormula1;
+import modelo.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 /**
  * Ventana principal de la aplicación de gestión de Fórmula 1
@@ -74,7 +76,7 @@ public class VentanaPrincipal extends JFrame {
         panel.setPreferredSize(new Dimension(0, 100));
 
         // Título principal
-        JLabel titulo = new JLabel("🏎️ Sistema de Gestión F1", JLabel.CENTER);
+        JLabel titulo = new JLabel("SISTEMA DE GESTIÓN FÓRMULA 1", JLabel.CENTER);
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 28));
         titulo.setForeground(Color.WHITE);
         titulo.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
@@ -105,7 +107,7 @@ public class VentanaPrincipal extends JFrame {
         gbc.insets = new Insets(15, 15, 15, 15);
 
         // Sección Gestión de Entidades
-        JLabel lblGestion = new JLabel("🏆 Gestión de Entidades");
+        JLabel lblGestion = new JLabel("GESTIÓN DE ENTIDADES");
         lblGestion.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblGestion.setForeground(new Color(52, 58, 64));
         gbc.gridx = 0;
@@ -116,30 +118,55 @@ public class VentanaPrincipal extends JFrame {
         gbc.gridwidth = 1;
         gbc.gridy = 1;
 
-        // Cards de gestión
+        // Cards de gestión con iconos visibles y tooltips informativos
         gbc.gridx = 0;
-        panel.add(crearCard("👨‍✈️", "Pilotos", "Gestionar pilotos y estadísticas",
-                new Color(0, 123, 255), e -> abrirGestionPilotos()), gbc);
+        JPanel cardPilotos = crearCardConIcono("P", "PILOTOS", "Gestionar pilotos y estadísticas",
+                new Color(0, 123, 255), e -> abrirGestionPilotos());
+        cardPilotos.setToolTipText("<html><b>Gestión de Pilotos</b><br>" +
+                "• Registrar nuevos pilotos<br>" +
+                "• Modificar información existente<br>" +
+                "• Ver estadísticas de rendimiento</html>");
+        panel.add(cardPilotos, gbc);
 
         gbc.gridx = 1;
-        panel.add(crearCard("🏁", "Escuderías", "Administrar equipos F1",
-                new Color(220, 53, 69), e -> abrirGestionEscuderias()), gbc);
+        JPanel cardEscuderias = crearCardConIcono("E", "ESCUDERÍAS", "Administrar equipos F1",
+                new Color(220, 53, 69), e -> abrirGestionEscuderias());
+        cardEscuderias.setToolTipText("<html><b>Gestión de Escuderías</b><br>" +
+                "• Crear y modificar equipos<br>" +
+                "• Asignar pilotos y autos<br>" +
+                "• Gestionar personal técnico</html>");
+        panel.add(cardEscuderias, gbc);
 
         gbc.gridx = 2;
-        panel.add(crearCard("🏎️", "Autos", "Gestionar vehículos",
-                new Color(40, 167, 69), e -> abrirGestionAutos()), gbc);
+        JPanel cardAutos = crearCardConIcono("A", "AUTOS", "Gestionar vehículos",
+                new Color(40, 167, 69), e -> abrirGestionAutos());
+        cardAutos.setToolTipText("<html><b>Gestión de Autos</b><br>" +
+                "• Registrar nuevos vehículos<br>" +
+                "• Configurar especificaciones técnicas<br>" +
+                "• Asignar a escuderías</html>");
+        panel.add(cardAutos, gbc);
 
         gbc.gridy = 2;
         gbc.gridx = 0;
-        panel.add(crearCard("🔧", "Mecánicos", "Personal técnico",
-                new Color(255, 193, 7), e -> abrirGestionMecanicos()), gbc);
+        JPanel cardMecanicos = crearCardConIcono("M", "MECÁNICOS", "Personal técnico",
+                new Color(255, 140, 0), e -> abrirGestionMecanicos());
+        cardMecanicos.setToolTipText("<html><b>Gestión de Mecánicos</b><br>" +
+                "• Registrar personal técnico<br>" +
+                "• Definir especialidades<br>" +
+                "• Asignar a escuderías</html>");
+        panel.add(cardMecanicos, gbc);
 
         gbc.gridx = 1;
-        panel.add(crearCard("🏁", "Circuitos", "Pistas de carreras",
-                new Color(108, 117, 125), e -> abrirGestionCircuitos()), gbc);
+        JPanel cardCircuitos = crearCardConIcono("C", "CIRCUITOS", "Pistas de carreras",
+                new Color(138, 43, 226), e -> abrirGestionCircuitos());
+        cardCircuitos.setToolTipText("<html><b>Gestión de Circuitos</b><br>" +
+                "• Registrar pistas de carrera<br>" +
+                "• Configurar características técnicas<br>" +
+                "• Definir países y ubicaciones</html>");
+        panel.add(cardCircuitos, gbc);
 
         // Sección Operaciones
-        JLabel lblOperaciones = new JLabel("🏆 Operaciones de Carrera");
+        JLabel lblOperaciones = new JLabel("OPERACIONES DE CARRERA");
         lblOperaciones.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblOperaciones.setForeground(new Color(52, 58, 64));
         gbc.gridx = 0;
@@ -153,18 +180,116 @@ public class VentanaPrincipal extends JFrame {
         gbc.insets = new Insets(15, 15, 15, 15);
 
         gbc.gridx = 0;
-        panel.add(crearCard("🏆", "Carreras", "Gestionar Grandes Premios",
-                new Color(220, 20, 60), e -> abrirGestionCarreras()), gbc);
+        JPanel cardCarreras = crearCardConIcono("R", "CARRERAS", "Planificar y gestionar Grandes Premios",
+                new Color(220, 20, 60), e -> abrirGestionCarreras());
+        cardCarreras.setToolTipText("<html><b>Gestión de Carreras</b><br>" +
+                "• Planificar Grandes Premios<br>" +
+                "• Registrar participaciones<br>" +
+                "• Capturar resultados y posiciones</html>");
+        panel.add(cardCarreras, gbc);
 
         gbc.gridx = 1;
-        panel.add(crearCard("📊", "Reportes", "Estadísticas y análisis",
-                new Color(102, 16, 242), e -> abrirReportes()), gbc);
+        JPanel cardReportes = crearCardConIcono("S", "REPORTES", "Estadísticas, rankings y análisis",
+                new Color(102, 16, 242), e -> abrirReportes());
+        cardReportes.setToolTipText("<html><b>Reportes y Análisis</b><br>" +
+                "• Rankings de pilotos por puntos<br>" +
+                "• Estadísticas de carreras<br>" +
+                "• Informes de rendimiento</html>");
+        panel.add(cardReportes, gbc);
 
         gbc.gridx = 2;
-        panel.add(crearCard("🚪", "Salir", "Cerrar aplicación",
-                new Color(134, 142, 150), e -> salirAplicacion()), gbc);
+        JPanel cardSalir = crearCardConIcono("X", "SALIR", "Cerrar aplicación",
+                new Color(134, 142, 150), e -> salirAplicacion());
+        cardSalir.setToolTipText("<html><b>Salir del Sistema</b><br>" +
+                "• Cerrar la aplicación<br>" +
+                "• Datos se mantendrán en sesión</html>");
+        panel.add(cardSalir, gbc);
 
         return panel;
+    }
+
+    /**
+     * Crea una card moderna para navegación con iconos emoji
+     */
+    private JPanel crearCardConIcono(String icono, String titulo, String descripcion, Color color,
+            ActionListener action) {
+        JPanel card = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 20));
+                g2d.fillRoundRect(2, 2, getWidth() - 2, getHeight() - 2, 15, 15);
+
+                // Fondo de la card
+                g2d.setColor(Color.WHITE);
+                g2d.fillRoundRect(0, 0, getWidth() - 2, getHeight() - 2, 15, 15);
+
+                // Borde de color
+                g2d.setColor(color);
+                g2d.setStroke(new BasicStroke(3));
+                g2d.drawRoundRect(1, 1, getWidth() - 4, getHeight() - 4, 15, 15);
+            }
+        };
+
+        card.setLayout(new BorderLayout());
+        card.setPreferredSize(new Dimension(160, 120));
+        card.setOpaque(false);
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Contenido de la card
+        JPanel contenido = new JPanel(new BorderLayout());
+        contenido.setOpaque(false);
+        contenido.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Icono con fuente confiable
+        JLabel lblIcono = new JLabel(icono, JLabel.CENTER);
+        lblIcono.setFont(new Font("Arial", Font.BOLD, 42));
+        lblIcono.setForeground(color);
+        lblIcono.setBorder(BorderFactory.createEmptyBorder(5, 0, 8, 0));
+
+        // Titulo
+        JLabel lblTitulo = new JLabel(titulo, JLabel.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitulo.setForeground(new Color(52, 58, 64));
+
+        // Descripción
+        JLabel lblDesc = new JLabel("<html><center>" + descripcion + "</center></html>", JLabel.CENTER);
+        lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblDesc.setForeground(new Color(108, 117, 125));
+
+        // Panel de texto
+        JPanel panelTexto = new JPanel(new BorderLayout());
+        panelTexto.setOpaque(false);
+        panelTexto.add(lblTitulo, BorderLayout.NORTH);
+        panelTexto.add(lblDesc, BorderLayout.CENTER);
+
+        contenido.add(lblIcono, BorderLayout.CENTER);
+        contenido.add(panelTexto, BorderLayout.SOUTH);
+
+        card.add(contenido, BorderLayout.CENTER);
+
+        // Efectos hover
+        card.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                card.repaint();
+                lblTitulo.setForeground(color);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                card.repaint();
+                lblTitulo.setForeground(new Color(52, 58, 64));
+            }
+
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                action.actionPerformed(new ActionEvent(card, ActionEvent.ACTION_PERFORMED, titulo));
+            }
+        });
+
+        return card;
     }
 
     /**
@@ -204,7 +329,9 @@ public class VentanaPrincipal extends JFrame {
         contenido.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JLabel lblIcono = new JLabel(icono, JLabel.CENTER);
-        lblIcono.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 32));
+        lblIcono.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lblIcono.setForeground(color);
+        lblIcono.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
         JLabel lblTitulo = new JLabel(titulo, JLabel.CENTER);
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -245,42 +372,112 @@ public class VentanaPrincipal extends JFrame {
     }
 
     /**
-     * Crea el panel de información lateral
+     * Crea el panel de información lateral con guía y estadísticas
      */
     private JPanel crearPanelInformacion() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(248, 249, 250));
-        panel.setPreferredSize(new Dimension(250, 0));
+        panel.setPreferredSize(new Dimension(280, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(220, 220, 220)),
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
-        // Título de la sección
-        JLabel titulo = new JLabel("📈 Resumen del Sistema");
+        // Panel principal con scroll
+        JPanel contenido = new JPanel(new BorderLayout());
+        contenido.setOpaque(false);
+
+        // Sección de guía rápida
+        JPanel panelGuia = crearPanelGuiaRapida();
+
+        // Sección de estadísticas
+        JPanel panelEstadisticas = crearPanelEstadisticas();
+
+        contenido.add(panelGuia, BorderLayout.NORTH);
+        contenido.add(panelEstadisticas, BorderLayout.CENTER);
+
+        JScrollPane scroll = new JScrollPane(contenido);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        panel.add(scroll, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Crea panel de guía rápida para usuario
+     */
+    private JPanel crearPanelGuiaRapida() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 0));
+
+        // Título
+        JLabel titulo = new JLabel("GUÍA RÁPIDA");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titulo.setForeground(new Color(52, 58, 64));
-        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        // Texto de ayuda
+        JTextArea guia = new JTextArea();
+        guia.setOpaque(false);
+        guia.setEditable(false);
+        guia.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        guia.setForeground(new Color(108, 117, 125));
+        guia.setLineWrap(true);
+        guia.setWrapStyleWord(true);
+        guia.setText(
+                "INSTRUCCIONES:\n\n" +
+                        "1. GESTIÓN: Use los botones P, E, A, M, C para registrar entidades\n\n" +
+                        "2. CARRERAS: Use el botón R para planificar y gestionar Grandes Premios\n\n" +
+                        "3. REPORTES: Use el botón S para consultar estadísticas y rankings\n\n" +
+                        "4. DOBLE CLIC: En las tablas para editar elementos rápidamente\n\n" +
+                        "Tip: Cada botón tiene un color distintivo para facilitar la navegación");
+
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(guia, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Crea panel de estadísticas del sistema
+     */
+    private JPanel crearPanelEstadisticas() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+
+        // Título de la sección
+        JLabel titulo = new JLabel("ESTADO DEL SISTEMA");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titulo.setForeground(new Color(52, 58, 64));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
         // Panel de estadísticas
-        JPanel panelStats = new JPanel(new GridLayout(7, 1, 0, 10));
+        JPanel panelStats = new JPanel(new GridLayout(8, 1, 0, 8));
         panelStats.setOpaque(false);
 
-        // Añadir estadísticas dinámicas
-        panelStats.add(crearStatItem("👨‍✈️ Pilotos:", String.valueOf(gestor.getPilotos().size())));
-        panelStats.add(crearStatItem("🏁 Escuderías:", String.valueOf(gestor.getEscuderias().size())));
-        panelStats.add(crearStatItem("🏎️ Autos:", String.valueOf(gestor.getAutos().size())));
-        panelStats.add(crearStatItem("🔧 Mecánicos:", String.valueOf(gestor.getMecanicos().size())));
-        panelStats.add(crearStatItem("🏁 Circuitos:", String.valueOf(gestor.getCircuitos().size())));
-        panelStats.add(crearStatItem("🏆 Carreras:", String.valueOf(gestor.getGrandesPremios().size())));
+        // Añadir estadísticas dinámicas con iconos simples
+        panelStats.add(crearStatItem("P - Pilotos:", String.valueOf(gestor.getPilotos().size())));
+        panelStats.add(crearStatItem("E - Escuderías:", String.valueOf(gestor.getEscuderias().size())));
+        panelStats.add(crearStatItem("A - Autos:", String.valueOf(gestor.getAutos().size())));
+        panelStats.add(crearStatItem("M - Mecánicos:", String.valueOf(gestor.getMecanicos().size())));
+        panelStats.add(crearStatItem("C - Circuitos:", String.valueOf(gestor.getCircuitos().size())));
+        panelStats.add(crearStatItem("R - Carreras:", String.valueOf(gestor.getGrandesPremios().size())));
 
         // Carreras finalizadas
         long carrerasFinalizadas = gestor.getGrandesPremios().stream()
                 .filter(gp -> gp.isFinalizada()).count();
-        panelStats.add(crearStatItem("✅ Finalizadas:", String.valueOf(carrerasFinalizadas)));
+        panelStats.add(crearStatItem("Finalizadas:", String.valueOf(carrerasFinalizadas)));
+
+        // Carreras pendientes
+        long carrerasPendientes = gestor.getGrandesPremios().stream()
+                .filter(gp -> !gp.isFinalizada()).count();
+        panelStats.add(crearStatItem("Pendientes:", String.valueOf(carrerasPendientes)));
 
         panel.add(titulo, BorderLayout.NORTH);
         panel.add(panelStats, BorderLayout.CENTER);
-
         return panel;
     }
 
@@ -306,25 +503,64 @@ public class VentanaPrincipal extends JFrame {
     }
 
     /**
-     * Crea el panel de estado mejorado
+     * Crea el panel de estado mejorado con información útil
      */
     private JPanel crearPanelEstado() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(52, 58, 64));
-        panel.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
-        lblEstado = new JLabel("🟢 Sistema iniciado - Listo para usar");
+        // Panel izquierdo con estado
+        JPanel panelIzquierdo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panelIzquierdo.setOpaque(false);
+
+        lblEstado = new JLabel("🟢 Sistema listo - Seleccione una opción para comenzar");
         lblEstado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblEstado.setForeground(Color.WHITE);
 
-        JLabel lblVersion = new JLabel("v1.0");
+        panelIzquierdo.add(lblEstado);
+
+        // Panel derecho con información adicional
+        JPanel panelDerecho = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        panelDerecho.setOpaque(false);
+
+        // Próxima carrera
+        String proximaCarrera = obtenerProximaCarrera();
+        JLabel lblProximaCarrera = new JLabel(proximaCarrera);
+        lblProximaCarrera.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblProximaCarrera.setForeground(new Color(255, 255, 255, 200));
+
+        // Version
+        JLabel lblVersion = new JLabel("Formula 1 Manager v1.0");
         lblVersion.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         lblVersion.setForeground(new Color(255, 255, 255, 150));
 
-        panel.add(lblEstado, BorderLayout.WEST);
-        panel.add(lblVersion, BorderLayout.EAST);
+        panelDerecho.add(lblProximaCarrera);
+        panelDerecho.add(new JLabel(" | "));
+        panelDerecho.add(lblVersion);
+
+        panel.add(panelIzquierdo, BorderLayout.WEST);
+        panel.add(panelDerecho, BorderLayout.EAST);
 
         return panel;
+    }
+
+    /**
+     * Obtiene información de la próxima carrera programada
+     */
+    private String obtenerProximaCarrera() {
+        List<GranPremio> carrerasPendientes = gestor.getGrandesPremios().stream()
+                .filter(gp -> !gp.isFinalizada())
+                .sorted((g1, g2) -> g1.getFechaHora().compareTo(g2.getFechaHora()))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (carrerasPendientes.isEmpty()) {
+            return "📅 No hay carreras programadas";
+        }
+
+        GranPremio proxima = carrerasPendientes.get(0);
+        return "🏁 Próxima: " + proxima.getNombre() + " - " +
+                proxima.getFechaHora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     /**
@@ -342,7 +578,7 @@ public class VentanaPrincipal extends JFrame {
      * Configura la ventana principal
      */
     private void configurarVentana() {
-        setTitle("🏎️ Escuderías Unidas - Sistema F1");
+        setTitle("ESCUDERÍAS UNIDAS - Sistema Fórmula 1");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 700);
         setLocationRelativeTo(null);

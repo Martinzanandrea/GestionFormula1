@@ -153,13 +153,20 @@ public class VentanaAutos extends JFrame {
      * Crea el panel de botones
      */
     private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout());
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnAgregar = new JButton("Agregar");
         JButton btnModificar = new JButton("Modificar");
         JButton btnEliminar = new JButton("Eliminar");
         JButton btnLimpiar = new JButton("Limpiar");
         JButton btnCerrar = new JButton("Cerrar");
+
+        // Aplicar estilos modernos a los botones
+        aplicarEstiloBoton(btnAgregar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnModificar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnEliminar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnLimpiar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnCerrar, new Color(0, 123, 255)); // Azul
 
         // Agregar listeners
         btnAgregar.addActionListener(e -> agregarAuto());
@@ -434,5 +441,16 @@ public class VentanaAutos extends JFrame {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Los campos numéricos deben contener valores válidos");
         }
+    }
+
+    /**
+     * Aplica estilo moderno a los botones con alta visibilidad
+     */
+    private void aplicarEstiloBoton(JButton boton, Color color) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }

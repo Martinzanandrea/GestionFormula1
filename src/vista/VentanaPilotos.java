@@ -70,7 +70,7 @@ public class VentanaPilotos extends JFrame {
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
         // Título del formulario
-        JLabel titulo = new JLabel("👨‍✈️ Datos del Piloto");
+        JLabel titulo = new JLabel("DATOS DEL PILOTO");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titulo.setForeground(new Color(52, 58, 64));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
@@ -118,9 +118,9 @@ public class VentanaPilotos extends JFrame {
         JPanel panelBotonesForm = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
         panelBotonesForm.setBackground(Color.WHITE);
 
-        btnAgregar = crearBoton("➕ Agregar", new Color(40, 167, 69));
-        btnModificar = crearBoton("✏️ Modificar", new Color(0, 123, 255));
-        btnLimpiar = crearBoton("🧹 Limpiar", new Color(108, 117, 125));
+        btnAgregar = crearBoton("AGREGAR", new Color(34, 139, 34)); // Verde más oscuro
+        btnModificar = crearBoton("MODIFICAR", new Color(30, 144, 255)); // Azul más brillante
+        btnLimpiar = crearBoton("LIMPIAR", new Color(255, 140, 0)); // Naranja
 
         panelBotonesForm.add(btnAgregar);
         panelBotonesForm.add(btnModificar);
@@ -187,28 +187,18 @@ public class VentanaPilotos extends JFrame {
     }
 
     /**
-     * Crea botones con estilo moderno
+     * Crea botones con estilo simple blanco y negro
      */
     private JButton crearBoton(String texto, Color color) {
         JButton boton = new JButton(texto);
-        boton.setPreferredSize(new Dimension(90, 35));
-        boton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        boton.setBackground(color);
-        boton.setForeground(Color.WHITE);
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-        boton.setFocusPainted(false);
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(140, 50));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // Efectos hover
-        boton.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(color.darker());
-            }
-
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(color);
-            }
-        });
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
 
         return boton;
     }
@@ -222,7 +212,7 @@ public class VentanaPilotos extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
         // Título de la sección
-        JLabel titulo = new JLabel("🏁 Lista de Pilotos Registrados");
+        JLabel titulo = new JLabel("LISTA DE PILOTOS REGISTRADOS");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titulo.setForeground(new Color(52, 58, 64));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
@@ -300,18 +290,19 @@ public class VentanaPilotos extends JFrame {
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
         // Título
-        JLabel titulo = new JLabel("📊 Información del Piloto");
+        JLabel titulo = new JLabel("INFORMACIÓN DEL PILOTO");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titulo.setForeground(new Color(52, 58, 64));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         // Imagen placeholder
-        lblImagenPiloto = new JLabel("👤", JLabel.CENTER);
-        lblImagenPiloto.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 60));
+        lblImagenPiloto = new JLabel("PILOTO", JLabel.CENTER);
+        lblImagenPiloto.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblImagenPiloto.setPreferredSize(new Dimension(120, 120));
         lblImagenPiloto.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 220, 220)),
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
+        lblImagenPiloto.setForeground(new Color(108, 117, 125));
 
         // Panel de estadísticas
         lblEstadisticas = new JLabel("<html><center>Selecciona un piloto<br>para ver sus estadísticas</center></html>");
@@ -333,9 +324,9 @@ public class VentanaPilotos extends JFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         panel.setBackground(new Color(248, 249, 250));
 
-        btnEliminar = crearBoton("🗑️ Eliminar", new Color(220, 53, 69));
-        JButton btnActualizar = crearBoton("🔄 Actualizar", new Color(108, 117, 125));
-        JButton btnCerrar = crearBoton("❌ Cerrar", new Color(134, 142, 150));
+        btnEliminar = crearBoton("ELIMINAR", new Color(220, 20, 60)); // Rojo más intenso
+        JButton btnActualizar = crearBoton("ACTUALIZAR", new Color(75, 0, 130)); // Púrpura oscuro
+        JButton btnCerrar = crearBoton("CERRAR", new Color(105, 105, 105)); // Gris oscuro
 
         panel.add(btnEliminar);
         panel.add(btnActualizar);
@@ -379,7 +370,7 @@ public class VentanaPilotos extends JFrame {
      * Configura la ventana
      */
     private void configurarVentana() {
-        setTitle("🏎️ Gestión de Pilotos - Sistema F1");
+        setTitle("Gestión de Pilotos - Sistema Formula 1");
         setSize(1200, 700);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -451,13 +442,13 @@ public class VentanaPilotos extends JFrame {
             limpiarFormulario();
 
             JOptionPane.showMessageDialog(this,
-                    "✅ Piloto agregado exitosamente",
+                    "Piloto agregado exitosamente",
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error al agregar piloto: " + e.getMessage(),
+                    "Error al agregar piloto: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -469,7 +460,7 @@ public class VentanaPilotos extends JFrame {
     private void modificarPiloto() {
         if (pilotoSeleccionado == null) {
             JOptionPane.showMessageDialog(this,
-                    "⚠️ Seleccione un piloto para modificar",
+                    "Seleccione un piloto para modificar",
                     "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -490,13 +481,13 @@ public class VentanaPilotos extends JFrame {
             limpiarFormulario();
 
             JOptionPane.showMessageDialog(this,
-                    "✅ Piloto modificado exitosamente",
+                    "Piloto modificado exitosamente",
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "❌ Error al modificar piloto: " + e.getMessage(),
+                    "Error al modificar piloto: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -509,7 +500,7 @@ public class VentanaPilotos extends JFrame {
         int filaSeleccionada = tablaPilotos.getSelectedRow();
         if (filaSeleccionada < 0) {
             JOptionPane.showMessageDialog(this,
-                    "⚠️ Seleccione un piloto para eliminar",
+                    "Seleccione un piloto para eliminar",
                     "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -533,7 +524,7 @@ public class VentanaPilotos extends JFrame {
                 limpiarFormulario();
 
                 JOptionPane.showMessageDialog(this,
-                        "✅ Piloto eliminado exitosamente",
+                        "Piloto eliminado exitosamente",
                         "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
             }

@@ -105,6 +105,10 @@ public class VentanaMecanicos extends JFrame {
         JButton btnAgregarEsp = new JButton("Agregar");
         JButton btnRemoverEsp = new JButton("Remover");
 
+        // Aplicar estilos a botones pequeños
+        aplicarEstiloBotonPequeno(btnAgregarEsp, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBotonPequeno(btnRemoverEsp, new Color(0, 123, 255)); // Azul
+
         btnAgregarEsp.addActionListener(e -> agregarEspecialidad());
         btnRemoverEsp.addActionListener(e -> removerEspecialidad());
 
@@ -162,13 +166,20 @@ public class VentanaMecanicos extends JFrame {
      * Crea el panel de botones
      */
     private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout());
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnAgregar = new JButton("Agregar");
         JButton btnModificar = new JButton("Modificar");
         JButton btnEliminar = new JButton("Eliminar");
         JButton btnLimpiar = new JButton("Limpiar");
         JButton btnCerrar = new JButton("Cerrar");
+
+        // Aplicar estilos modernos a los botones
+        aplicarEstiloBoton(btnAgregar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnModificar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnEliminar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnLimpiar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnCerrar, new Color(0, 123, 255)); // Azul
 
         // Agregar listeners
         btnAgregar.addActionListener(e -> agregarMecanico());
@@ -446,5 +457,27 @@ public class VentanaMecanicos extends JFrame {
         if (modeloEspecialidades.isEmpty()) {
             throw new IllegalArgumentException("Debe agregar al menos una especialidad");
         }
+    }
+
+    /**
+     * Aplica estilo moderno a los botones con alta visibilidad
+     */
+    private void aplicarEstiloBoton(JButton boton, Color color) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
+    }
+
+    /**
+     * Aplica estilo simple a botones pequeños
+     */
+    private void aplicarEstiloBotonPequeno(JButton boton, Color color) {
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }
