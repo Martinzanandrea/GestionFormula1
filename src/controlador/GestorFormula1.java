@@ -344,9 +344,10 @@ public class GestorFormula1 {
      * @since 1.0
      */
     public void inscribirPilotoEnCarrera(Piloto piloto, Auto auto, GranPremio granPremio) {
-        // Verificar que el auto esté disponible
-        if (!autoDisponibleEnCarrera(auto, granPremio)) {
-            throw new IllegalArgumentException("El auto ya está asignado a otro piloto en esta carrera");
+        // Usar el validador completo para verificar todas las reglas
+        String error = ValidadorFormula1.validarNuevaParticipacion(piloto, auto, granPremio, this);
+        if (error != null) {
+            throw new IllegalArgumentException(error);
         }
 
         // Crear y agregar la participación
@@ -510,5 +511,187 @@ public class GestorFormula1 {
 
     public List<GranPremio> getGrandesPremios() {
         return new ArrayList<>(grandesPremios);
+    }
+
+    // ==================== MÉTODOS DE GESTIÓN DE RESULTADOS ====================
+
+    /**
+     * Establece la posición final de un piloto en una carrera y actualiza
+     * automáticamente los puntos
+     * 
+     * @param participacion Participación del piloto
+     * @param posicion      Posición final (1-based)
+     * @throws IllegalArgumentException si la posición no es válida
+     */
+    public void establecerPosicionFinal(Participacion participacion, int posicion) {
+        if (posicion < 1) {
+            throw new IllegalArgumentException("La posición debe ser mayor a 0");
+        }
+
+        // Establecer la posición
+        participacion.setPosicionFinal(posicion);
+
+        // Actualizar puntos automáticamente según el sistema oficial
+        ValidadorFormula1.actualizarPuntosParticipacion(participacion);
+
+        // Actualizar puntos totales del piloto
+        actualizarPuntosTotalesPiloto(participacion.getPiloto());
+    }
+
+    /**
+     * Marca una participación como abandono
+     * 
+     * @param participacion Participación del piloto
+     * @param motivo        Motivo del abandono
+     */
+    public void marcarAbandono(Participacion participacion, String motivo) {
+        participacion.marcarAbandono(motivo);
+        ValidadorFormula1.actualizarPuntosParticipacion(participacion);
+        actualizarPuntosTotalesPiloto(participacion.getPiloto());
+    }
+
+    /**
+     * Asigna la vuelta rápida a un piloto (solo si terminó en top 10)
+     * 
+     * @param participacion     Participación del piloto
+     * @param tieneVueltaRapida true si logró la vuelta rápida
+     */
+    public void asignarVueltaRapida(Participacion participacion, boolean tieneVueltaRapida) {
+        participacion.setVueltaRapida(tieneVueltaRapida);
+        ValidadorFormula1.actualizarPuntosParticipacion(participacion);
+        actualizarPuntosTotalesPiloto(participacion.getPiloto());
+    }
+
+    /**
+     * Valida y finaliza una carrera verificando que todas las posiciones sean
+     * correctas
+     * 
+     * @param granPremio Gran Premio a finalizar
+     * @throws IllegalStateException si hay inconsistencias en las posiciones
+     */
+    public void finalizarCarrera(GranPremio granPremio) {
+        if (!ValidadorFormula1.validarPosicionesUnicas(granPremio)) {
+            throw new IllegalStateException(
+                    "Las posiciones de la carrera tienen inconsistencias (duplicados o huecos)");
+        }
+
+        granPremio.setFinalizada(true);
+
+        // Actualizar puntos de todos los participantes
+        if (granPremio.getParticipaciones() != null) {
+            for (Participacion participacion : granPremio.getParticipaciones()) {
+                ValidadorFormula1.actualizarPuntosParticipacion(participacion);
+                actualizarPuntosTotalesPiloto(participacion.getPiloto());
+            }
+        }
+    }
+
+    /**
+     * Actualiza los puntos totales de un piloto sumando todas sus participaciones
+     * 
+     * @param piloto Piloto cuyos puntos se actualizarán
+     */
+    private void actualizarPuntosTotalesPiloto(Piloto piloto) {
+        int puntosTotal = grandesPremios.stream()
+                .filter(GranPremio::isFinalizada)
+                .flatMap(gp -> gp.getParticipaciones().stream())
+                .filter(p -> p.getPiloto().equals(piloto))
+                .mapToInt(Participacion::getPuntosObtenidos)
+                .sum();
+
+        piloto.setPuntosTotales(puntosTotal);
+    }
+
+    /**
+     * Establece los resultados completos de una carrera.
+     * <p>
+     * Permite establecer las posiciones finales de todos los participantes
+     * de una carrera de una sola vez.
+     * </p>
+     * 
+     * @param granPremio         Gran Premio cuyos resultados se establecerán
+     * @param resultados         Map con piloto como clave y posición como valor
+     * @param pilotoVueltaRapida Piloto que obtuvo la vuelta más rápida (puede ser
+     *                           null)
+     * @throws IllegalArgumentException si hay errores en los resultados
+     */
+    public void establecerResultadosCarrera(GranPremio granPremio, java.util.Map<Piloto, Integer> resultados,
+            Piloto pilotoVueltaRapida) {
+        // Validar que no está finalizada
+        if (granPremio.isFinalizada()) {
+            throw new IllegalArgumentException("La carrera ya está finalizada");
+        }
+
+        // Establecer posiciones
+        for (java.util.Map.Entry<Piloto, Integer> entrada : resultados.entrySet()) {
+            Piloto piloto = entrada.getKey();
+            Integer posicion = entrada.getValue();
+
+            // Buscar participación del piloto
+            Participacion participacion = granPremio.getParticipaciones().stream()
+                    .filter(p -> p.getPiloto().equals(piloto))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "El piloto " + piloto.getNombreCompleto() + " no está inscrito en esta carrera"));
+
+            establecerPosicionFinal(participacion, posicion);
+        }
+
+        // Establecer vuelta rápida si se especifica
+        if (pilotoVueltaRapida != null) {
+            Participacion participacionVR = granPremio.getParticipaciones().stream()
+                    .filter(p -> p.getPiloto().equals(pilotoVueltaRapida))
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new IllegalArgumentException("El piloto de la vuelta rápida no está en la carrera"));
+
+            asignarVueltaRapida(participacionVR, true);
+        }
+
+        // Finalizar carrera automáticamente
+        finalizarCarrera(granPremio);
+    }
+
+    /**
+     * Obtiene un resumen de resultados de una carrera finalizada.
+     * 
+     * @param granPremio Gran Premio del cual obtener resultados
+     * @return Lista de strings con los resultados formateados
+     */
+    public java.util.List<String> obtenerResumenResultados(GranPremio granPremio) {
+        if (!granPremio.isFinalizada()) {
+            throw new IllegalArgumentException("La carrera no está finalizada");
+        }
+
+        return granPremio.getResultados().stream()
+                .map(p -> String.format("P%d - %s (%s) - %d puntos%s",
+                        p.getPosicionFinal(),
+                        p.getPiloto().getNombreCompleto(),
+                        p.getPiloto().getEscuderia() != null ? p.getPiloto().getEscuderia().getNombre()
+                                : "Sin escudería",
+                        p.getPuntosObtenidos(),
+                        p.isVueltaRapida() ? " + VR" : ""))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Cambia la escudería de un piloto validando las restricciones
+     * 
+     * @param piloto         Piloto a cambiar
+     * @param nuevaEscuderia Nueva escudería
+     * @throws IllegalArgumentException si el cambio no es válido
+     */
+    public void cambiarEscuderiaPiloto(Piloto piloto, Escuderia nuevaEscuderia) {
+        if (!ValidadorFormula1.validarPilotoEscuderiaUnica(piloto, nuevaEscuderia, this)) {
+            throw new IllegalArgumentException("No se puede cambiar de escudería: el piloto tiene carreras pendientes");
+        }
+
+        // Remover de la escudería actual si existe
+        if (piloto.getEscuderia() != null) {
+            piloto.getEscuderia().removerPiloto(piloto);
+        }
+
+        // Agregar a la nueva escudería
+        nuevaEscuderia.agregarPiloto(piloto);
     }
 }

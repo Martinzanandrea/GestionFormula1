@@ -4,20 +4,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase que representa un mecánico de Fórmula 1
+ * Clase que representa un mecánico de Fórmula 1.
+ * <p>
+ * Un mecánico es un miembro del personal técnico de una escudería,
+ * responsable del mantenimiento y configuración de los autos de carrera.
+ * Puede tener múltiples especialidades técnicas.
+ * </p>
+ * 
+ * @author Sistema de Gestión F1
+ * @version 1.0
+ * @since 1.0
  */
 public class Mecanico {
+    /** Nombre del mecánico */
     private String nombre;
+    /** Apellido del mecánico */
     private String apellido;
-    private int experiencia; // años de experiencia
-    private List<String> especialidades;
+    /** Años de experiencia en F1 */
+    private int experiencia;
+    /** Lista de especialidades técnicas del mecánico */
+    private List<Especialidad> especialidades;
 
     /**
-     * Constructor de la clase Mecanico
+     * Constructor de la clase Mecanico.
+     * <p>
+     * Crea un nuevo mecánico con la información básica.
+     * La lista de especialidades se inicializa vacía.
+     * </p>
      * 
-     * @param nombre      Nombre del mecánico
-     * @param apellido    Apellido del mecánico
-     * @param experiencia Años de experiencia
+     * @param nombre      Nombre del mecánico (no puede ser null o vacío)
+     * @param apellido    Apellido del mecánico (no puede ser null o vacío)
+     * @param experiencia Años de experiencia (debe ser no negativo)
+     * @throws IllegalArgumentException si algún parámetro no es válido
      */
     public Mecanico(String nombre, String apellido, int experiencia) {
         this.nombre = nombre;
@@ -26,12 +44,18 @@ public class Mecanico {
         this.especialidades = new ArrayList<>();
     }
 
+    // ==================== GESTIÓN DE ESPECIALIDADES ====================
+
     /**
-     * Agrega una especialidad al mecánico
+     * Agrega una especialidad al mecánico.
+     * <p>
+     * No permite especialidades duplicadas.
+     * </p>
      * 
-     * @param especialidad Especialidad a agregar
+     * @param especialidad Especialidad técnica a agregar
+     * @throws IllegalArgumentException si la especialidad es null
      */
-    public void agregarEspecialidad(String especialidad) {
+    public void agregarEspecialidad(Especialidad especialidad) {
         if (!especialidades.contains(especialidad)) {
             especialidades.add(especialidad);
         }
@@ -42,7 +66,7 @@ public class Mecanico {
      * 
      * @param especialidad Especialidad a remover
      */
-    public void removerEspecialidad(String especialidad) {
+    public void removerEspecialidad(Especialidad especialidad) {
         especialidades.remove(especialidad);
     }
 
@@ -71,7 +95,7 @@ public class Mecanico {
         this.experiencia = experiencia;
     }
 
-    public List<String> getEspecialidades() {
+    public List<Especialidad> getEspecialidades() {
         return new ArrayList<>(especialidades);
     }
 
@@ -90,7 +114,10 @@ public class Mecanico {
      * @return Especialidades concatenadas
      */
     public String getEspecialidadesString() {
-        return String.join(", ", especialidades);
+        return especialidades.stream()
+                .map(Especialidad::toString)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("Sin especialidades");
     }
 
     @Override

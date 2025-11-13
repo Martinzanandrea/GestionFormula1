@@ -67,13 +67,17 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 0;
         panel.add(new JLabel("Modelo:"), gbc);
         gbc.gridx = 1;
-        txtModelo = new JTextField(15);
+        txtModelo = new JTextField();
+        txtModelo.setPreferredSize(new Dimension(200, 35));
+        txtModelo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtModelo, gbc);
 
         gbc.gridx = 2;
         panel.add(new JLabel("Chasis:"), gbc);
         gbc.gridx = 3;
-        txtChasis = new JTextField(15);
+        txtChasis = new JTextField();
+        txtChasis.setPreferredSize(new Dimension(200, 35));
+        txtChasis.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtChasis, gbc);
 
         // Segunda fila
@@ -81,13 +85,17 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 1;
         panel.add(new JLabel("Motor:"), gbc);
         gbc.gridx = 1;
-        txtMotor = new JTextField(15);
+        txtMotor = new JTextField();
+        txtMotor.setPreferredSize(new Dimension(200, 35));
+        txtMotor.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtMotor, gbc);
 
         gbc.gridx = 2;
         panel.add(new JLabel("Año:"), gbc);
         gbc.gridx = 3;
-        txtAño = new JTextField(15);
+        txtAño = new JTextField();
+        txtAño.setPreferredSize(new Dimension(200, 35));
+        txtAño.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtAño, gbc);
 
         // Tercera fila
@@ -95,13 +103,17 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 2;
         panel.add(new JLabel("Número de Chasis:"), gbc);
         gbc.gridx = 1;
-        txtNumeroChasis = new JTextField(15);
+        txtNumeroChasis = new JTextField();
+        txtNumeroChasis.setPreferredSize(new Dimension(200, 35));
+        txtNumeroChasis.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtNumeroChasis, gbc);
 
         gbc.gridx = 2;
         panel.add(new JLabel("Peso (kg):"), gbc);
         gbc.gridx = 3;
-        txtPeso = new JTextField(15);
+        txtPeso = new JTextField();
+        txtPeso.setPreferredSize(new Dimension(200, 35));
+        txtPeso.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtPeso, gbc);
 
         // Cuarta fila
@@ -109,7 +121,9 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 3;
         panel.add(new JLabel("Potencia (HP):"), gbc);
         gbc.gridx = 1;
-        txtPotencia = new JTextField(15);
+        txtPotencia = new JTextField();
+        txtPotencia.setPreferredSize(new Dimension(200, 35));
+        txtPotencia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtPotencia, gbc);
 
         return panel;
@@ -162,11 +176,11 @@ public class VentanaAutos extends JFrame {
         JButton btnCerrar = new JButton("Cerrar");
 
         // Aplicar estilos modernos a los botones
-        aplicarEstiloBoton(btnAgregar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnModificar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnEliminar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnLimpiar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnCerrar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnAgregar);
+        aplicarEstiloBoton(btnModificar);
+        aplicarEstiloBoton(btnEliminar);
+        aplicarEstiloBoton(btnLimpiar);
+        aplicarEstiloBoton(btnCerrar);
 
         // Agregar listeners
         btnAgregar.addActionListener(e -> agregarAuto());
@@ -446,7 +460,11 @@ public class VentanaAutos extends JFrame {
     /**
      * Aplica estilo moderno a los botones con alta visibilidad
      */
-    private void aplicarEstiloBoton(JButton boton, Color color) {
+    private void aplicarEstiloBoton(JButton boton) {
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
         // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
         boton.setForeground(Color.BLACK);

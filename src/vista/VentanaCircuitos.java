@@ -68,7 +68,9 @@ public class VentanaCircuitos extends JFrame {
         gbc.gridy = 0;
         panel.add(new JLabel("Nombre:"), gbc);
         gbc.gridx = 1;
-        txtNombre = new JTextField(20);
+        txtNombre = new JTextField();
+        txtNombre.setPreferredSize(new Dimension(250, 35));
+        txtNombre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtNombre, gbc);
 
         gbc.gridx = 2;
@@ -82,13 +84,17 @@ public class VentanaCircuitos extends JFrame {
         gbc.gridy = 1;
         panel.add(new JLabel("Longitud (km):"), gbc);
         gbc.gridx = 1;
-        txtLongitud = new JTextField(20);
+        txtLongitud = new JTextField();
+        txtLongitud.setPreferredSize(new Dimension(250, 35));
+        txtLongitud.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtLongitud, gbc);
 
         gbc.gridx = 2;
         panel.add(new JLabel("Número de Curvas:"), gbc);
         gbc.gridx = 3;
-        txtNumeroCurvas = new JTextField(20);
+        txtNumeroCurvas = new JTextField();
+        txtNumeroCurvas.setPreferredSize(new Dimension(250, 35));
+        txtNumeroCurvas.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtNumeroCurvas, gbc);
 
         // Tercera fila
@@ -96,7 +102,9 @@ public class VentanaCircuitos extends JFrame {
         gbc.gridy = 2;
         panel.add(new JLabel("Tipo:"), gbc);
         gbc.gridx = 1;
-        txtTipo = new JTextField(20);
+        txtTipo = new JTextField();
+        txtTipo.setPreferredSize(new Dimension(250, 35));
+        txtTipo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtTipo, gbc);
 
         // Agregar etiqueta de ayuda para tipo
@@ -156,6 +164,14 @@ public class VentanaCircuitos extends JFrame {
         JButton btnLimpiar = new JButton("Limpiar");
         JButton btnEstadisticas = new JButton("Estadísticas");
         JButton btnCerrar = new JButton("Cerrar");
+
+        // Aplicar estilos estándar
+        aplicarEstiloBoton(btnAgregar);
+        aplicarEstiloBoton(btnModificar);
+        aplicarEstiloBoton(btnEliminar);
+        aplicarEstiloBoton(btnLimpiar);
+        aplicarEstiloBoton(btnEstadisticas);
+        aplicarEstiloBoton(btnCerrar);
 
         // Agregar listeners
         btnAgregar.addActionListener(e -> agregarCircuito());
@@ -469,5 +485,20 @@ public class VentanaCircuitos extends JFrame {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Los campos numéricos deben contener valores válidos");
         }
+    }
+
+    /**
+     * Aplica estilo simple a botones
+     */
+    private void aplicarEstiloBoton(JButton boton) {
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }

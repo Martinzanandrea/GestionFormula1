@@ -17,7 +17,6 @@ public class VentanaPilotos extends JFrame {
     private JTable tablaPilotos;
     private DefaultTableModel modeloTabla;
     private JTextField txtNombre, txtApellido, txtEdad, txtNacionalidad, txtNumero, txtExperiencia;
-    private JComboBox<Escuderia> comboEscuderias;
     private JLabel lblImagenPiloto, lblEstadisticas;
     private Piloto pilotoSeleccionado;
     private JButton btnAgregar, btnModificar, btnEliminar, btnLimpiar;
@@ -64,7 +63,7 @@ public class VentanaPilotos extends JFrame {
     private JPanel crearPanelFormulario() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        panel.setPreferredSize(new Dimension(320, 0));
+        panel.setPreferredSize(new Dimension(800, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
@@ -88,13 +87,6 @@ public class VentanaPilotos extends JFrame {
         txtNumero = crearCampoTexto();
         txtExperiencia = crearCampoTexto();
 
-        comboEscuderias = new JComboBox<>();
-        comboEscuderias.setPreferredSize(new Dimension(200, 35));
-        comboEscuderias.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        comboEscuderias.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(206, 212, 218)),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
-
         // Agregar campos al formulario
         gbc.insets = new Insets(8, 0, 8, 0);
         gbc.anchor = GridBagConstraints.WEST;
@@ -106,13 +98,6 @@ public class VentanaPilotos extends JFrame {
         agregarCampo(panelCampos, "Nacionalidad:", txtNacionalidad, 3, gbc);
         agregarCampo(panelCampos, "Número:", txtNumero, 4, gbc);
         agregarCampo(panelCampos, "Años Exp.:", txtExperiencia, 5, gbc);
-
-        gbc.gridy = 6;
-        gbc.gridx = 0;
-        JLabel lblEscuderia = crearEtiqueta("Escudería:");
-        panelCampos.add(lblEscuderia, gbc);
-        gbc.gridx = 1;
-        panelCampos.add(comboEscuderias, gbc);
 
         // Panel de botones del formulario
         JPanel panelBotonesForm = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
@@ -153,7 +138,7 @@ public class VentanaPilotos extends JFrame {
         JLabel label = new JLabel(texto);
         label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         label.setForeground(new Color(73, 80, 87));
-        label.setPreferredSize(new Dimension(80, 25));
+        label.setPreferredSize(new Dimension(140, 25));
         return label;
     }
 
@@ -162,24 +147,24 @@ public class VentanaPilotos extends JFrame {
      */
     private JTextField crearCampoTexto() {
         JTextField campo = new JTextField();
-        campo.setPreferredSize(new Dimension(200, 35));
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        campo.setPreferredSize(new Dimension(600, 35));
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(206, 212, 218)),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         // Efectos focus
         campo.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 campo.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(new Color(0, 123, 255), 2),
-                        BorderFactory.createEmptyBorder(4, 9, 4, 9)));
+                        BorderFactory.createEmptyBorder(4, 4, 4, 4)));
             }
 
             public void focusLost(java.awt.event.FocusEvent evt) {
                 campo.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(new Color(206, 212, 218)),
-                        BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)));
             }
         });
 
@@ -187,12 +172,14 @@ public class VentanaPilotos extends JFrame {
     }
 
     /**
-     * Crea botones con estilo simple blanco y negro
+     * Crea botones con estilo simple blanco y negro y tamaño estándar
      */
     private JButton crearBoton(String texto, Color color) {
         JButton boton = new JButton(texto);
-        boton.setPreferredSize(new Dimension(140, 50));
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
 
         // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
@@ -218,7 +205,7 @@ public class VentanaPilotos extends JFrame {
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
         // Configurar tabla
-        String[] columnas = { "#", "Nombre Completo", "Edad", "Nacionalidad", "Número", "Escudería", "Puntos",
+        String[] columnas = { "#", "Nombre Completo", "Edad", "Nacionalidad", "Número", "Puntos",
                 "Experiencia" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
@@ -284,7 +271,7 @@ public class VentanaPilotos extends JFrame {
     private JPanel crearPanelInformacion() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        panel.setPreferredSize(new Dimension(280, 0));
+        panel.setPreferredSize(new Dimension(250, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(220, 220, 220)),
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)));
@@ -371,29 +358,17 @@ public class VentanaPilotos extends JFrame {
      */
     private void configurarVentana() {
         setTitle("Gestión de Pilotos - Sistema Formula 1");
-        setSize(1200, 700);
+        setSize(1600, 700);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(true);
     }
 
     /**
-     * Carga los datos en la tabla y combos
+     * Carga los datos en la tabla
      */
     private void cargarDatos() {
-        cargarEscuderias();
         actualizarTabla();
-    }
-
-    /**
-     * Carga las escuderías en el combo
-     */
-    private void cargarEscuderias() {
-        comboEscuderias.removeAllItems();
-        comboEscuderias.addItem(null); // Opción sin escudería
-        for (Escuderia escuderia : gestor.getEscuderias()) {
-            comboEscuderias.addItem(escuderia);
-        }
     }
 
     /**
@@ -408,7 +383,6 @@ public class VentanaPilotos extends JFrame {
                     piloto.getEdad(),
                     piloto.getNacionalidad(),
                     piloto.getNumero(),
-                    piloto.getEscuderia() != null ? piloto.getEscuderia().getNombre() : "Sin escudería",
                     piloto.getPuntosTotales(),
                     piloto.getExperiencia()
             };
@@ -429,13 +403,8 @@ public class VentanaPilotos extends JFrame {
             String nacionalidad = txtNacionalidad.getText().trim();
             int numero = Integer.parseInt(txtNumero.getText().trim());
             int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
-            Escuderia escuderia = (Escuderia) comboEscuderias.getSelectedItem();
 
             Piloto nuevoPiloto = new Piloto(nombre, apellido, edad, nacionalidad, numero, experiencia);
-            if (escuderia != null) {
-                nuevoPiloto.setEscuderia(escuderia);
-            }
-
             gestor.registrarPiloto(nuevoPiloto);
 
             actualizarTabla();
@@ -475,7 +444,6 @@ public class VentanaPilotos extends JFrame {
             pilotoSeleccionado.setNacionalidad(txtNacionalidad.getText().trim());
             pilotoSeleccionado.setNumero(Integer.parseInt(txtNumero.getText().trim()));
             pilotoSeleccionado.setExperiencia(Integer.parseInt(txtExperiencia.getText().trim()));
-            pilotoSeleccionado.setEscuderia((Escuderia) comboEscuderias.getSelectedItem());
 
             actualizarTabla();
             limpiarFormulario();
@@ -559,7 +527,6 @@ public class VentanaPilotos extends JFrame {
         txtNacionalidad.setText(piloto.getNacionalidad());
         txtNumero.setText(String.valueOf(piloto.getNumero()));
         txtExperiencia.setText(String.valueOf(piloto.getExperiencia()));
-        comboEscuderias.setSelectedItem(piloto.getEscuderia());
     }
 
     /**
@@ -571,10 +538,7 @@ public class VentanaPilotos extends JFrame {
         stats.append("Número: #").append(piloto.getNumero()).append("<br>");
         stats.append("Puntos: ").append(piloto.getPuntosTotales()).append("<br>");
         stats.append("Experiencia: ").append(piloto.getExperiencia()).append(" años<br>");
-
-        if (piloto.getEscuderia() != null) {
-            stats.append("Escudería: ").append(piloto.getEscuderia().getNombre()).append("<br>");
-        }
+        stats.append("Nacionalidad: ").append(piloto.getNacionalidad()).append("<br>");
 
         stats.append("</div></html>");
         lblEstadisticas.setText(stats.toString());
@@ -590,7 +554,6 @@ public class VentanaPilotos extends JFrame {
         txtNacionalidad.setText("");
         txtNumero.setText("");
         txtExperiencia.setText("");
-        comboEscuderias.setSelectedIndex(0);
         pilotoSeleccionado = null;
         tablaPilotos.clearSelection();
 

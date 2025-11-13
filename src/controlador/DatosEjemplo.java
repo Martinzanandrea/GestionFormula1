@@ -3,14 +3,41 @@ package controlador;
 import modelo.*;
 
 /**
- * Clase para cargar datos de ejemplo en el sistema
+ * Clase utilitaria para cargar datos de ejemplo en el sistema de gestión de
+ * Fórmula 1.
+ * <p>
+ * Esta clase proporciona un método estático para poblar el sistema con
+ * datos representativos del mundo real de la F1, incluyendo países,
+ * escuderías, pilotos, autos, mecánicos y circuitos.
+ * </p>
+ * 
+ * @author Sistema de Gestión F1
+ * @version 1.0
+ * @since 1.0
  */
 public class DatosEjemplo {
 
     /**
-     * Carga datos de ejemplo en el gestor
+     * Constructor privado para evitar instanciación.
+     * <p>
+     * Esta es una clase utilitaria con métodos estáticos únicamente.
+     * </p>
+     */
+    private DatosEjemplo() {
+        // Clase utilitaria
+    }
+
+    /**
+     * Carga un conjunto completo de datos de ejemplo en el gestor.
+     * <p>
+     * Incluye países, escuderías, pilotos, autos, mecánicos y circuitos
+     * basados en datos reales de la Fórmula 1. Los datos se cargan en
+     * el orden correcto respetando las dependencias entre entidades.
+     * </p>
      * 
-     * @param gestor Gestor donde cargar los datos
+     * @param gestor Gestor donde cargar los datos (no puede ser null)
+     * @throws IllegalArgumentException si el gestor es null
+     * @throws RuntimeException         si ocurre un error durante la carga
      */
     public static void cargarDatos(GestorFormula1 gestor) {
         try {
@@ -82,12 +109,12 @@ public class DatosEjemplo {
 
             // Crear mecánicos
             Mecanico mecFerrari1 = new Mecanico("Luigi", "Rossi", 15);
-            mecFerrari1.agregarEspecialidad("Motor");
-            mecFerrari1.agregarEspecialidad("Aerodinámica");
+            mecFerrari1.agregarEspecialidad(Especialidad.MOTOR);
+            mecFerrari1.agregarEspecialidad(Especialidad.ELECTRONICA);
 
             Mecanico mecFerrari2 = new Mecanico("Marco", "Bianchi", 12);
-            mecFerrari2.agregarEspecialidad("Suspensión");
-            mecFerrari2.agregarEspecialidad("Frenos");
+            mecFerrari2.agregarEspecialidad(Especialidad.CHASIS);
+            mecFerrari2.agregarEspecialidad(Especialidad.NEUMATICOS);
 
             gestor.registrarMecanico(mecFerrari1);
             gestor.registrarMecanico(mecFerrari2);

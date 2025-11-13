@@ -54,13 +54,17 @@ public class GranPremio {
             throw new IllegalStateException("El Gran Premio ya está finalizado");
         }
 
-        // Sistema de puntuación oficial F1
-        int[] puntos = { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 };
-
         for (Participacion participacion : participaciones) {
             int posicion = participacion.getPosicionFinal();
-            if (posicion > 0 && posicion <= puntos.length) {
-                int puntosObtenidos = puntos[posicion - 1];
+            if (posicion > 0) {
+                // Usar el sistema de puntuación oficial
+                int puntosObtenidos = SistemaPuntuacion.getPuntosPorPosicion(posicion);
+
+                // Punto adicional por vuelta rápida si termina en top 10
+                if (participacion.isVueltaRapida() && posicion <= 10) {
+                    puntosObtenidos += 1;
+                }
+
                 participacion.setPuntosObtenidos(puntosObtenidos);
                 participacion.getPiloto().sumarPuntos(puntosObtenidos);
             }
@@ -112,6 +116,10 @@ public class GranPremio {
 
     public boolean isFinalizada() {
         return finalizada;
+    }
+
+    public void setFinalizada(boolean finalizada) {
+        this.finalizada = finalizada;
     }
 
     @Override

@@ -988,6 +988,10 @@ public class VentanaReportes extends JFrame {
      * Aplica estilo moderno a los botones con alta visibilidad
      */
     private void aplicarEstiloBoton(JButton boton) {
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
         // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
         boton.setForeground(Color.BLACK);

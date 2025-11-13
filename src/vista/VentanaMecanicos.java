@@ -15,9 +15,9 @@ public class VentanaMecanicos extends JFrame {
     private JTable tablaMecanicos;
     private DefaultTableModel modeloTabla;
     private JTextField txtNombre, txtApellido, txtExperiencia;
-    private JList<String> listaEspecialidades;
-    private DefaultListModel<String> modeloEspecialidades;
-    private JTextField txtNuevaEspecialidad;
+    private JList<Especialidad> listaEspecialidades;
+    private DefaultListModel<Especialidad> modeloEspecialidades;
+    private JComboBox<Especialidad> comboEspecialidades;
 
     /**
      * Constructor de la ventana de mecánicos
@@ -72,20 +72,26 @@ public class VentanaMecanicos extends JFrame {
         gbc.gridy = 0;
         panelDatos.add(new JLabel("Nombre:"), gbc);
         gbc.gridx = 1;
-        txtNombre = new JTextField(15);
+        txtNombre = new JTextField();
+        txtNombre.setPreferredSize(new Dimension(200, 35));
+        txtNombre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panelDatos.add(txtNombre, gbc);
 
         gbc.gridx = 2;
         panelDatos.add(new JLabel("Apellido:"), gbc);
         gbc.gridx = 3;
-        txtApellido = new JTextField(15);
+        txtApellido = new JTextField();
+        txtApellido.setPreferredSize(new Dimension(200, 35));
+        txtApellido.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panelDatos.add(txtApellido, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         panelDatos.add(new JLabel("Experiencia (años):"), gbc);
         gbc.gridx = 1;
-        txtExperiencia = new JTextField(15);
+        txtExperiencia = new JTextField();
+        txtExperiencia.setPreferredSize(new Dimension(200, 35));
+        txtExperiencia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panelDatos.add(txtExperiencia, gbc);
 
         // Panel de especialidades
@@ -101,13 +107,13 @@ public class VentanaMecanicos extends JFrame {
 
         // Panel para agregar especialidades
         JPanel panelAgregarEsp = new JPanel(new BorderLayout());
-        txtNuevaEspecialidad = new JTextField();
+        comboEspecialidades = new JComboBox<>(Especialidad.values());
         JButton btnAgregarEsp = new JButton("Agregar");
         JButton btnRemoverEsp = new JButton("Remover");
 
         // Aplicar estilos a botones pequeños
-        aplicarEstiloBotonPequeno(btnAgregarEsp, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBotonPequeno(btnRemoverEsp, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBotonPequeno(btnAgregarEsp);
+        aplicarEstiloBotonPequeno(btnRemoverEsp);
 
         btnAgregarEsp.addActionListener(e -> agregarEspecialidad());
         btnRemoverEsp.addActionListener(e -> removerEspecialidad());
@@ -116,8 +122,8 @@ public class VentanaMecanicos extends JFrame {
         panelBotonesEsp.add(btnAgregarEsp);
         panelBotonesEsp.add(btnRemoverEsp);
 
-        panelAgregarEsp.add(new JLabel("Nueva especialidad:"), BorderLayout.WEST);
-        panelAgregarEsp.add(txtNuevaEspecialidad, BorderLayout.CENTER);
+        panelAgregarEsp.add(new JLabel("Especialidad:"), BorderLayout.WEST);
+        panelAgregarEsp.add(comboEspecialidades, BorderLayout.CENTER);
         panelAgregarEsp.add(panelBotonesEsp, BorderLayout.EAST);
 
         panelEspecialidades.add(scrollEspecialidades, BorderLayout.CENTER);
@@ -175,11 +181,11 @@ public class VentanaMecanicos extends JFrame {
         JButton btnCerrar = new JButton("Cerrar");
 
         // Aplicar estilos modernos a los botones
-        aplicarEstiloBoton(btnAgregar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnModificar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnEliminar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnLimpiar, new Color(0, 123, 255)); // Azul
-        aplicarEstiloBoton(btnCerrar, new Color(0, 123, 255)); // Azul
+        aplicarEstiloBoton(btnAgregar);
+        aplicarEstiloBoton(btnModificar);
+        aplicarEstiloBoton(btnEliminar);
+        aplicarEstiloBoton(btnLimpiar);
+        aplicarEstiloBoton(btnCerrar);
 
         // Agregar listeners
         btnAgregar.addActionListener(e -> agregarMecanico());
@@ -260,7 +266,7 @@ public class VentanaMecanicos extends JFrame {
 
                 // Cargar especialidades
                 modeloEspecialidades.clear();
-                for (String especialidad : mecanico.getEspecialidades()) {
+                for (Especialidad especialidad : mecanico.getEspecialidades()) {
                     modeloEspecialidades.addElement(especialidad);
                 }
             }
@@ -271,11 +277,10 @@ public class VentanaMecanicos extends JFrame {
      * Agrega una especialidad a la lista
      */
     private void agregarEspecialidad() {
-        String especialidad = txtNuevaEspecialidad.getText().trim();
-        if (!especialidad.isEmpty() && !modeloEspecialidades.contains(especialidad)) {
+        Especialidad especialidad = (Especialidad) comboEspecialidades.getSelectedItem();
+        if (especialidad != null && !modeloEspecialidades.contains(especialidad)) {
             modeloEspecialidades.addElement(especialidad);
-            txtNuevaEspecialidad.setText("");
-        } else if (modeloEspecialidades.contains(especialidad)) {
+        } else if (especialidad != null && modeloEspecialidades.contains(especialidad)) {
             JOptionPane.showMessageDialog(this, "La especialidad ya está en la lista", "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
         }
@@ -285,7 +290,7 @@ public class VentanaMecanicos extends JFrame {
      * Remueve una especialidad de la lista
      */
     private void removerEspecialidad() {
-        String especialidadSeleccionada = listaEspecialidades.getSelectedValue();
+        Especialidad especialidadSeleccionada = listaEspecialidades.getSelectedValue();
         if (especialidadSeleccionada != null) {
             modeloEspecialidades.removeElement(especialidadSeleccionada);
         } else {
@@ -357,8 +362,8 @@ public class VentanaMecanicos extends JFrame {
 
                 // Actualizar especialidades
                 // Primero remover todas las especialidades existentes
-                List<String> especialidadesActuales = mecanico.getEspecialidades();
-                for (String esp : especialidadesActuales) {
+                List<Especialidad> especialidadesActuales = mecanico.getEspecialidades();
+                for (Especialidad esp : especialidadesActuales) {
                     mecanico.removerEspecialidad(esp);
                 }
 
@@ -428,7 +433,6 @@ public class VentanaMecanicos extends JFrame {
         txtNombre.setText("");
         txtApellido.setText("");
         txtExperiencia.setText("");
-        txtNuevaEspecialidad.setText("");
         modeloEspecialidades.clear();
         tablaMecanicos.clearSelection();
     }
@@ -462,7 +466,11 @@ public class VentanaMecanicos extends JFrame {
     /**
      * Aplica estilo moderno a los botones con alta visibilidad
      */
-    private void aplicarEstiloBoton(JButton boton, Color color) {
+    private void aplicarEstiloBoton(JButton boton) {
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
         // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
         boton.setForeground(Color.BLACK);
@@ -473,7 +481,11 @@ public class VentanaMecanicos extends JFrame {
     /**
      * Aplica estilo simple a botones pequeños
      */
-    private void aplicarEstiloBotonPequeno(JButton boton, Color color) {
+    private void aplicarEstiloBotonPequeno(JButton boton) {
+        // Tamaño estándar para botones pequeños
+        boton.setPreferredSize(new Dimension(80, 30));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 10));
+
         // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
         boton.setForeground(Color.BLACK);

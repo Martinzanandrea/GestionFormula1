@@ -113,6 +113,12 @@ public class VentanaCarreras extends JFrame {
         JButton btnEliminarCarrera = new JButton("Eliminar");
         JButton btnLimpiarPlan = new JButton("Limpiar");
 
+        // Aplicar estilos estándar
+        aplicarEstiloBoton(btnPlanificar);
+        aplicarEstiloBoton(btnModificarCarrera);
+        aplicarEstiloBoton(btnEliminarCarrera);
+        aplicarEstiloBoton(btnLimpiarPlan);
+
         btnPlanificar.addActionListener(e -> planificarCarrera());
         btnModificarCarrera.addActionListener(e -> modificarCarrera());
         btnEliminarCarrera.addActionListener(e -> eliminarCarrera());
@@ -188,6 +194,7 @@ public class VentanaCarreras extends JFrame {
         panelInscripcionForm.add(comboAutos, gbc);
 
         JButton btnInscribir = new JButton("Inscribir Piloto");
+        aplicarEstiloBoton(btnInscribir);
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
@@ -219,6 +226,10 @@ public class VentanaCarreras extends JFrame {
         JPanel panelBotonesPartic = new JPanel(new FlowLayout());
         JButton btnRemoverParticipacion = new JButton("Remover Inscripción");
         JButton btnActualizarInscritos = new JButton("Actualizar Lista");
+
+        // Aplicar estilos estándar
+        aplicarEstiloBoton(btnRemoverParticipacion);
+        aplicarEstiloBoton(btnActualizarInscritos);
 
         btnRemoverParticipacion.addActionListener(e -> removerParticipacion());
         btnActualizarInscritos.addActionListener(e -> {
@@ -278,6 +289,11 @@ public class VentanaCarreras extends JFrame {
         JButton btnEditarResultado = new JButton("Editar Resultado");
         JButton btnVerResultados = new JButton("Ver Resultados Finales");
 
+        // Aplicar estilos estándar
+        aplicarEstiloBoton(btnFinalizarCarrera);
+        aplicarEstiloBoton(btnEditarResultado);
+        aplicarEstiloBoton(btnVerResultados);
+
         btnFinalizarCarrera.addActionListener(e -> finalizarCarrera());
         btnEditarResultado.addActionListener(e -> editarResultadoParticipacion());
         btnVerResultados.addActionListener(e -> verResultadosFinales());
@@ -300,6 +316,7 @@ public class VentanaCarreras extends JFrame {
         JPanel panel = new JPanel(new FlowLayout());
 
         JButton btnCerrar = new JButton("Cerrar");
+        aplicarEstiloBoton(btnCerrar);
         btnCerrar.addActionListener(e -> dispose());
 
         panel.add(btnCerrar);
@@ -372,17 +389,48 @@ public class VentanaCarreras extends JFrame {
     /**
      * Actualiza la tabla de participaciones
      */
+    /**
+     * Actualiza la tabla de participaciones mostrando posiciones y puntos
+     */
     private void actualizarTablaParticipaciones() {
         modeloTablaParticipaciones.setRowCount(0);
         if (carreraSeleccionada != null) {
-            for (Participacion participacion : carreraSeleccionada.getParticipaciones()) {
+            // Obtener participaciones ordenadas por posición
+            java.util.List<Participacion> participaciones = carreraSeleccionada.getParticipaciones()
+                    .stream()
+                    .sorted((p1, p2) -> {
+                        // Los que no terminaron van al final
+                        if (p1.getPosicionFinal() == 0 && p2.getPosicionFinal() == 0) {
+                            return p1.getPiloto().getNombreCompleto().compareTo(p2.getPiloto().getNombreCompleto());
+                        }
+                        if (p1.getPosicionFinal() == 0)
+                            return 1;
+                        if (p2.getPosicionFinal() == 0)
+                            return -1;
+                        return Integer.compare(p1.getPosicionFinal(), p2.getPosicionFinal());
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            for (Participacion participacion : participaciones) {
+                String posicion;
+                if (participacion.isAbandono()) {
+                    posicion = "DNF";
+                } else if (participacion.getPosicionFinal() > 0) {
+                    posicion = "P" + participacion.getPosicionFinal();
+                    if (participacion.isVueltaRapida()) {
+                        posicion += " + VR";
+                    }
+                } else {
+                    posicion = "Sin clasificar";
+                }
+
                 Object[] fila = {
                         participacion.getPiloto().getNombreCompleto(),
                         participacion.getPiloto().getEscuderia() != null
                                 ? participacion.getPiloto().getEscuderia().getNombre()
                                 : "Sin escudería",
                         participacion.getAuto().getModelo(),
-                        participacion.getPosicionFinal() > 0 ? "P" + participacion.getPosicionFinal() : "No terminó",
+                        posicion,
                         participacion.getPuntosObtenidos()
                 };
                 modeloTablaParticipaciones.addRow(fila);
@@ -672,6 +720,10 @@ public class VentanaCarreras extends JFrame {
         JButton btnGuardar = new JButton("Guardar");
         JButton btnCancelar = new JButton("Cancelar");
 
+        // Aplicar estilos estándar
+        aplicarEstiloBoton(btnGuardar);
+        aplicarEstiloBoton(btnCancelar);
+
         btnGuardar.addActionListener(e -> {
             try {
                 if (chkAbandono.isSelected()) {
@@ -688,6 +740,8 @@ public class VentanaCarreras extends JFrame {
                             throw new IllegalArgumentException("La posición debe estar entre 1 y 30");
                         }
                         participacion.setPosicionFinal(posicion);
+                        // Actualizar puntos automáticamente usando el controlador
+                        controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
                     }
                 }
 
@@ -703,6 +757,8 @@ public class VentanaCarreras extends JFrame {
                 }
 
                 participacion.setVueltaRapida(chkVueltaRapida.isSelected());
+                // Recalcular puntos si tiene vuelta rápida
+                controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
 
                 actualizarTablaParticipaciones();
                 dialog.dispose();
@@ -755,13 +811,20 @@ public class VentanaCarreras extends JFrame {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                carreraSeleccionada.finalizar();
+                // Usar el método del gestor que valida y actualiza correctamente
+                gestor.finalizarCarrera(carreraSeleccionada);
                 actualizarTablaCarreras();
                 actualizarTablaParticipaciones();
 
-                JOptionPane.showMessageDialog(this,
-                        "Carrera finalizada exitosamente.\nSe han asignado los puntos correspondientes.",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // Mostrar resumen de resultados
+                java.util.List<String> resultados = gestor.obtenerResumenResultados(carreraSeleccionada);
+                StringBuilder mensaje = new StringBuilder("Carrera finalizada exitosamente!\n\nResultados:\n");
+                for (String resultado : resultados) {
+                    mensaje.append(resultado).append("\n");
+                }
+
+                JOptionPane.showMessageDialog(this, mensaje.toString(), "Carrera Finalizada",
+                        JOptionPane.INFORMATION_MESSAGE);
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error al finalizar carrera: " + e.getMessage(), "Error",
@@ -898,5 +961,20 @@ public class VentanaCarreras extends JFrame {
             throw new IllegalArgumentException(
                     "Formato de fecha u hora incorrecto. Use dd/MM/yyyy para fecha y HH:mm para hora");
         }
+    }
+
+    /**
+     * Aplica estilo simple a botones
+     */
+    private void aplicarEstiloBoton(JButton boton) {
+        // Tamaño estándar para todos los botones
+        boton.setPreferredSize(new Dimension(120, 40));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
+        // Interfaz simple blanco y negro
+        boton.setBackground(Color.WHITE);
+        boton.setForeground(Color.BLACK);
+        boton.setBorder(BorderFactory.createRaisedBevelBorder());
+        boton.setFocusPainted(true);
     }
 }
