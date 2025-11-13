@@ -67,16 +67,24 @@ public class DatosEjemplo {
             gestor.registrarEscuderia(mercedes);
             gestor.registrarEscuderia(mclaren);
 
-            // Crear autos
-            Auto ferrariF1 = new Auto("SF-23", "Ferrari", "Ferrari V6", 2023, "FER001", 798.0, 1000);
-            Auto redbullF1 = new Auto("RB19", "Red Bull", "Honda RBPT", 2023, "RB001", 795.0, 1050);
-            Auto mercedesF1 = new Auto("W14", "Mercedes", "Mercedes V6", 2023, "MER001", 796.0, 1020);
-            Auto mclarenF1 = new Auto("MCL60", "McLaren", "Mercedes V6", 2023, "MCL001", 797.0, 1010);
+            // Crear autos (cada escudería tiene 2 autos)
+            Auto ferrariF1_leclerc = new Auto("SF-23", "Ferrari", "Ferrari V6", 2023, "FER001", 798.0, 1000);
+            Auto ferrariF1_sainz = new Auto("SF-23", "Ferrari", "Ferrari V6", 2023, "FER002", 798.0, 1000);
+            Auto redbullF1_verstappen = new Auto("RB19", "Red Bull", "Honda RBPT", 2023, "RB001", 795.0, 1050);
+            Auto redbullF1_perez = new Auto("RB19", "Red Bull", "Honda RBPT", 2023, "RB002", 795.0, 1050);
+            Auto mercedesF1_hamilton = new Auto("W14", "Mercedes", "Mercedes V6", 2023, "MER001", 796.0, 1020);
+            Auto mercedesF1_russell = new Auto("W14", "Mercedes", "Mercedes V6", 2023, "MER002", 796.0, 1020);
+            Auto mclarenF1_norris = new Auto("MCL60", "McLaren", "Mercedes V6", 2023, "MCL001", 797.0, 1010);
+            Auto mclarenF1_piastri = new Auto("MCL60", "McLaren", "Mercedes V6", 2023, "MCL002", 797.0, 1010);
 
-            gestor.registrarAuto(ferrariF1);
-            gestor.registrarAuto(redbullF1);
-            gestor.registrarAuto(mercedesF1);
-            gestor.registrarAuto(mclarenF1);
+            gestor.registrarAuto(ferrariF1_leclerc);
+            gestor.registrarAuto(ferrariF1_sainz);
+            gestor.registrarAuto(redbullF1_verstappen);
+            gestor.registrarAuto(redbullF1_perez);
+            gestor.registrarAuto(mercedesF1_hamilton);
+            gestor.registrarAuto(mercedesF1_russell);
+            gestor.registrarAuto(mclarenF1_norris);
+            gestor.registrarAuto(mclarenF1_piastri);
 
             // Crear pilotos
             Piloto leclerc = new Piloto("Charles", "Leclerc", 26, "Monegasco", 16, 7);
@@ -101,11 +109,15 @@ public class DatosEjemplo {
             gestor.asignarPilotoAEscuderia(hamilton, mercedes);
             gestor.asignarPilotoAEscuderia(russell, mercedes);
 
-            // Agregar autos a escuderías
-            ferrari.agregarAuto(ferrariF1);
-            redbull.agregarAuto(redbullF1);
-            mercedes.agregarAuto(mercedesF1);
-            mclaren.agregarAuto(mclarenF1);
+            // Asignar autos a escuderías
+            ferrari.agregarAuto(ferrariF1_leclerc);
+            ferrari.agregarAuto(ferrariF1_sainz);
+            redbull.agregarAuto(redbullF1_verstappen);
+            redbull.agregarAuto(redbullF1_perez);
+            mercedes.agregarAuto(mercedesF1_hamilton);
+            mercedes.agregarAuto(mercedesF1_russell);
+            mclaren.agregarAuto(mclarenF1_norris);
+            mclaren.agregarAuto(mclarenF1_piastri);
 
             // Crear mecánicos
             Mecanico mecFerrari1 = new Mecanico("Luigi", "Rossi", 15);
@@ -130,6 +142,50 @@ public class DatosEjemplo {
             gestor.registrarCircuito(monza);
             gestor.registrarCircuito(silverstone);
             gestor.registrarCircuito(monaco_circuit);
+
+            // Crear Grandes Premios de ejemplo
+            java.time.LocalDateTime fechaMonza = java.time.LocalDateTime.of(2024, 9, 1, 14, 0);
+            java.time.LocalDateTime fechaSilverstone = java.time.LocalDateTime.of(2024, 7, 7, 15, 0);
+            java.time.LocalDateTime fechaMonaco = java.time.LocalDateTime.of(2024, 5, 26, 14, 0);
+
+            GranPremio gpMonza = new GranPremio("Gran Premio de Italia", fechaMonza, monza);
+            GranPremio gpSilverstone = new GranPremio("Gran Premio de Gran Bretaña", fechaSilverstone, silverstone);
+            GranPremio gpMonaco = new GranPremio("Gran Premio de Mónaco", fechaMonaco, monaco_circuit);
+
+            gestor.registrarGranPremio(gpMonza);
+            gestor.registrarGranPremio(gpSilverstone);
+            gestor.registrarGranPremio(gpMonaco);
+
+            // Inscribir pilotos en carreras de ejemplo
+            try {
+                // Gran Premio de Mónaco (finalizado con resultados)
+                gestor.inscribirPilotoEnCarrera(leclerc, ferrariF1_leclerc, gpMonaco);
+                gestor.inscribirPilotoEnCarrera(sainz, ferrariF1_sainz, gpMonaco);
+                gestor.inscribirPilotoEnCarrera(verstappen, redbullF1_verstappen, gpMonaco);
+                gestor.inscribirPilotoEnCarrera(perez, redbullF1_perez, gpMonaco);
+                gestor.inscribirPilotoEnCarrera(hamilton, mercedesF1_hamilton, gpMonaco);
+                gestor.inscribirPilotoEnCarrera(russell, mercedesF1_russell, gpMonaco);
+
+                // Establecer resultados del GP de Mónaco
+                java.util.Map<Piloto, Integer> resultadosMonaco = new java.util.HashMap<>();
+                resultadosMonaco.put(verstappen, 1); // Max gana
+                resultadosMonaco.put(leclerc, 2); // Charles segundo
+                resultadosMonaco.put(perez, 3); // Pérez tercero
+                resultadosMonaco.put(sainz, 4); // Sainz cuarto
+                resultadosMonaco.put(hamilton, 5); // Hamilton quinto
+                resultadosMonaco.put(russell, 6); // Russell sexto
+
+                gestor.establecerResultadosCarrera(gpMonaco, resultadosMonaco, verstappen); // Max tiene vuelta rápida
+
+                // Gran Premio de Silverstone (próximo a correr)
+                gestor.inscribirPilotoEnCarrera(hamilton, mercedesF1_hamilton, gpSilverstone);
+                gestor.inscribirPilotoEnCarrera(russell, mercedesF1_russell, gpSilverstone);
+                gestor.inscribirPilotoEnCarrera(verstappen, redbullF1_verstappen, gpSilverstone);
+                gestor.inscribirPilotoEnCarrera(perez, redbullF1_perez, gpSilverstone);
+
+            } catch (Exception e) {
+                System.err.println("Error al inscribir pilotos en carreras: " + e.getMessage());
+            }
 
         } catch (Exception e) {
             System.err.println("Error al cargar datos de ejemplo: " + e.getMessage());

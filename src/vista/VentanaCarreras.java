@@ -131,9 +131,10 @@ public class VentanaCarreras extends JFrame {
 
         // Tabla de carreras planificadas
         JPanel panelTablaCarreras = new JPanel(new BorderLayout());
-        panelTablaCarreras.setBorder(BorderFactory.createTitledBorder("Carreras Planificadas"));
+        panelTablaCarreras.setBorder(BorderFactory.createTitledBorder("📋 Carreras del Campeonato"));
 
-        String[] columnasCarreras = { "Nombre", "Circuito", "País", "Fecha", "Hora", "Estado", "Participantes" };
+        String[] columnasCarreras = { "Gran Premio", "Circuito", "País", "Fecha", "Hora", "Estado", "Pilotos",
+                "Ganador" };
         modeloTablaCarreras = new DefaultTableModel(columnasCarreras, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -204,9 +205,9 @@ public class VentanaCarreras extends JFrame {
 
         // Tabla de participaciones
         JPanel panelTablaParticipaciones = new JPanel(new BorderLayout());
-        panelTablaParticipaciones.setBorder(BorderFactory.createTitledBorder("Pilotos Inscritos"));
+        panelTablaParticipaciones.setBorder(BorderFactory.createTitledBorder("🏎️ Participantes de la Carrera"));
 
-        String[] columnasParticipaciones = { "Piloto", "Escudería", "Auto", "Posición", "Puntos" };
+        String[] columnasParticipaciones = { "Pos.", "Piloto", "Escudería", "Auto", "Puntos", "Detalles" };
         modeloTablaParticipaciones = new DefaultTableModel(columnasParticipaciones, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -285,19 +286,23 @@ public class VentanaCarreras extends JFrame {
 
         // Botones de resultados
         JPanel panelBotonesRes = new JPanel(new FlowLayout());
-        JButton btnFinalizarCarrera = new JButton("Finalizar Carrera");
-        JButton btnEditarResultado = new JButton("Editar Resultado");
-        JButton btnVerResultados = new JButton("Ver Resultados Finales");
+        JButton btnEstablecerResultadosRapido = new JButton("⚡ Resultados Automáticos");
+        JButton btnEditarResultado = new JButton("✏️ Editar Resultado");
+        JButton btnFinalizarCarrera = new JButton("🏁 Finalizar Carrera");
+        JButton btnVerResultados = new JButton("📊 Ver Resultados");
 
         // Aplicar estilos estándar
-        aplicarEstiloBoton(btnFinalizarCarrera);
+        aplicarEstiloBoton(btnEstablecerResultadosRapido);
         aplicarEstiloBoton(btnEditarResultado);
+        aplicarEstiloBoton(btnFinalizarCarrera);
         aplicarEstiloBoton(btnVerResultados);
 
-        btnFinalizarCarrera.addActionListener(e -> finalizarCarrera());
+        btnEstablecerResultadosRapido.addActionListener(e -> establecerResultadosAutomaticos());
         btnEditarResultado.addActionListener(e -> editarResultadoParticipacion());
+        btnFinalizarCarrera.addActionListener(e -> finalizarCarrera());
         btnVerResultados.addActionListener(e -> verResultadosFinales());
 
+        panelBotonesRes.add(btnEstablecerResultadosRapido);
         panelBotonesRes.add(btnEditarResultado);
         panelBotonesRes.add(btnFinalizarCarrera);
         panelBotonesRes.add(btnVerResultados);
@@ -368,19 +373,27 @@ public class VentanaCarreras extends JFrame {
     }
 
     /**
-     * Actualiza la tabla de carreras
+     * Actualiza la tabla de carreras mostrando información más detallada
      */
     private void actualizarTablaCarreras() {
         modeloTablaCarreras.setRowCount(0);
         for (GranPremio carrera : gestor.getGrandesPremios()) {
+            String ganador = "No finalizada";
+            if (carrera.isFinalizada() && !carrera.getResultados().isEmpty()) {
+                Participacion primerLugar = carrera.getResultados().get(0);
+                ganador = primerLugar.getPiloto().getNombreCompleto() +
+                        " (" + primerLugar.getPuntosObtenidos() + " pts)";
+            }
+
             Object[] fila = {
                     carrera.getNombre(),
                     carrera.getCircuito().getNombre(),
                     carrera.getCircuito().getPais().getNombre(),
                     carrera.getFechaHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                     carrera.getFechaHora().format(DateTimeFormatter.ofPattern("HH:mm")),
-                    carrera.isFinalizada() ? "Finalizada" : "Programada",
-                    carrera.getParticipaciones().size()
+                    carrera.isFinalizada() ? "✅ Finalizada" : "⏳ Programada",
+                    carrera.getParticipaciones().size(),
+                    ganador
             };
             modeloTablaCarreras.addRow(fila);
         }
@@ -391,6 +404,7 @@ public class VentanaCarreras extends JFrame {
      */
     /**
      * Actualiza la tabla de participaciones mostrando posiciones y puntos
+     * claramente
      */
     private void actualizarTablaParticipaciones() {
         modeloTablaParticipaciones.setRowCount(0);
@@ -413,25 +427,39 @@ public class VentanaCarreras extends JFrame {
 
             for (Participacion participacion : participaciones) {
                 String posicion;
+                String detalles = "";
+
                 if (participacion.isAbandono()) {
                     posicion = "DNF";
+                    detalles = "Abandono: "
+                            + (participacion.getMotivoAbandono() != null ? participacion.getMotivoAbandono()
+                                    : "No especificado");
                 } else if (participacion.getPosicionFinal() > 0) {
                     posicion = "P" + participacion.getPosicionFinal();
                     if (participacion.isVueltaRapida()) {
-                        posicion += " + VR";
+                        detalles = "Vuelta más rápida";
+                    }
+                    if (participacion.getPosicionFinal() == 1) {
+                        detalles += " 🏆 GANADOR";
+                    } else if (participacion.getPosicionFinal() == 2) {
+                        detalles += " 🥈 Segundo";
+                    } else if (participacion.getPosicionFinal() == 3) {
+                        detalles += " 🥉 Tercero";
                     }
                 } else {
-                    posicion = "Sin clasificar";
+                    posicion = "-";
+                    detalles = carreraSeleccionada.isFinalizada() ? "No clasificado" : "Sin resultado";
                 }
 
                 Object[] fila = {
+                        posicion,
                         participacion.getPiloto().getNombreCompleto(),
                         participacion.getPiloto().getEscuderia() != null
                                 ? participacion.getPiloto().getEscuderia().getNombre()
                                 : "Sin escudería",
                         participacion.getAuto().getModelo(),
-                        posicion,
-                        participacion.getPuntosObtenidos()
+                        participacion.getPuntosObtenidos() + " pts",
+                        detalles
                 };
                 modeloTablaParticipaciones.addRow(fila);
             }
@@ -662,16 +690,30 @@ public class VentanaCarreras extends JFrame {
      * Muestra el diálogo para editar resultado de participación
      */
     private void editarResultadoDialog(Participacion participacion) {
-        JDialog dialog = new JDialog(this, "Editar Resultado - " + participacion.getPiloto().getNombreCompleto(), true);
-        dialog.setLayout(new GridBagLayout());
+        JDialog dialog = new JDialog(this, "🏁 Registrar Resultado - " + participacion.getPiloto().getNombreCompleto(),
+                true);
+        dialog.setLayout(new BorderLayout());
+
+        // Panel principal con información del piloto
+        JPanel panelInfo = new JPanel(new FlowLayout());
+        panelInfo.setBorder(BorderFactory.createTitledBorder("Información del Piloto"));
+        panelInfo.add(new JLabel("Piloto: " + participacion.getPiloto().getNombreCompleto()));
+        panelInfo.add(new JLabel(" | Auto: " + participacion.getAuto().getModelo()));
+        if (participacion.getPiloto().getEscuderia() != null) {
+            panelInfo.add(new JLabel(" | Escudería: " + participacion.getPiloto().getEscuderia().getNombre()));
+        }
+
+        // Panel del formulario
+        JPanel panelFormulario = new JPanel(new GridBagLayout());
+        panelFormulario.setBorder(BorderFactory.createTitledBorder("Resultado de la Carrera"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
         // Campos del formulario
         JTextField txtPosicion = new JTextField(10);
         JTextField txtMejorVuelta = new JTextField(10);
-        JCheckBox chkVueltaRapida = new JCheckBox("Vuelta más rápida");
-        JCheckBox chkAbandono = new JCheckBox("Abandono");
+        JCheckBox chkVueltaRapida = new JCheckBox("🏆 Vuelta más rápida de la carrera");
+        JCheckBox chkAbandono = new JCheckBox("❌ No terminó la carrera (DNF)");
         JTextField txtMotivoAbandono = new JTextField(20);
 
         // Cargar datos actuales
@@ -679,7 +721,7 @@ public class VentanaCarreras extends JFrame {
             txtPosicion.setText(String.valueOf(participacion.getPosicionFinal()));
         }
         if (participacion.getMejorVuelta() != null) {
-            txtMejorVuelta.setText(participacion.getMejorVuelta().toString());
+            txtPosicion.setText(participacion.getMejorVuelta().toString());
         }
         chkVueltaRapida.setSelected(participacion.isVueltaRapida());
         chkAbandono.setSelected(participacion.isAbandono());
@@ -690,39 +732,62 @@ public class VentanaCarreras extends JFrame {
         // Layout del formulario
         gbc.gridx = 0;
         gbc.gridy = 0;
-        dialog.add(new JLabel("Posición final:"), gbc);
+        panelFormulario.add(new JLabel("Posición final (1-20):"), gbc);
         gbc.gridx = 1;
-        dialog.add(txtPosicion, gbc);
+        panelFormulario.add(txtPosicion, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        dialog.add(new JLabel("Mejor vuelta (HH:mm:ss):"), gbc);
+        panelFormulario.add(new JLabel("Mejor vuelta (mm:ss.SSS):"), gbc);
         gbc.gridx = 1;
-        dialog.add(txtMejorVuelta, gbc);
+        panelFormulario.add(txtMejorVuelta, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
-        dialog.add(chkVueltaRapida, gbc);
+        panelFormulario.add(chkVueltaRapida, gbc);
 
         gbc.gridy = 3;
-        dialog.add(chkAbandono, gbc);
+        panelFormulario.add(chkAbandono, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 1;
-        dialog.add(new JLabel("Motivo abandono:"), gbc);
+        panelFormulario.add(new JLabel("Motivo del abandono:"), gbc);
         gbc.gridx = 1;
-        dialog.add(txtMotivoAbandono, gbc);
+        panelFormulario.add(txtMotivoAbandono, gbc);
+
+        // Panel de información de puntos
+        JPanel panelPuntos = new JPanel();
+        panelPuntos.setBorder(BorderFactory.createTitledBorder("💰 Sistema de Puntuación"));
+        JTextArea areaPuntos = new JTextArea(3, 50);
+        areaPuntos.setEditable(false);
+        areaPuntos.setText("🏆 P1: 25 pts | 🥈 P2: 18 pts | 🥉 P3: 15 pts | P4: 12 pts | P5: 10 pts\n" +
+                "P6: 8 pts | P7: 6 pts | P8: 4 pts | P9: 2 pts | P10: 1 pt\n" +
+                "⚡ Vuelta más rápida: +1 punto extra (solo si termina en top 10)");
+        areaPuntos.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        panelPuntos.add(areaPuntos);
 
         // Botones
         JPanel panelBotones = new JPanel(new FlowLayout());
-        JButton btnGuardar = new JButton("Guardar");
-        JButton btnCancelar = new JButton("Cancelar");
+        JButton btnGuardar = new JButton("💾 Guardar Resultado");
+        JButton btnCancelar = new JButton("❌ Cancelar");
 
         // Aplicar estilos estándar
         aplicarEstiloBoton(btnGuardar);
         aplicarEstiloBoton(btnCancelar);
+
+        // Listeners para los checkboxes
+        chkAbandono.addActionListener(e -> {
+            boolean abandonar = chkAbandono.isSelected();
+            txtPosicion.setEnabled(!abandonar);
+            chkVueltaRapida.setEnabled(!abandonar);
+            txtMotivoAbandono.setEnabled(abandonar);
+            if (abandonar) {
+                txtPosicion.setText("");
+                chkVueltaRapida.setSelected(false);
+            }
+        });
 
         btnGuardar.addActionListener(e -> {
             try {
@@ -732,39 +797,59 @@ public class VentanaCarreras extends JFrame {
                         motivo = "No especificado";
                     }
                     participacion.marcarAbandono(motivo);
+                    participacion.setPuntosObtenidos(0); // Sin puntos por abandono
                 } else {
                     String posicionText = txtPosicion.getText().trim();
-                    if (!posicionText.isEmpty()) {
-                        int posicion = Integer.parseInt(posicionText);
-                        if (posicion < 1 || posicion > 30) {
-                            throw new IllegalArgumentException("La posición debe estar entre 1 y 30");
-                        }
-                        participacion.setPosicionFinal(posicion);
-                        // Actualizar puntos automáticamente usando el controlador
-                        controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
+                    if (posicionText.isEmpty()) {
+                        throw new IllegalArgumentException("Debe especificar la posición final");
                     }
+
+                    int posicion = Integer.parseInt(posicionText);
+                    if (posicion < 1 || posicion > 20) {
+                        throw new IllegalArgumentException("La posición debe estar entre 1 y 20");
+                    }
+
+                    participacion.setPosicionFinal(posicion);
+                    participacion.setVueltaRapida(chkVueltaRapida.isSelected());
+
+                    // Actualizar puntos automáticamente usando el validador
+                    controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
                 }
 
                 // Mejor vuelta
                 String mejorVueltaText = txtMejorVuelta.getText().trim();
                 if (!mejorVueltaText.isEmpty()) {
                     try {
-                        LocalTime mejorVuelta = LocalTime.parse(mejorVueltaText);
+                        LocalTime mejorVuelta = LocalTime.parse("00:" + mejorVueltaText);
                         participacion.setMejorVuelta(mejorVuelta);
                     } catch (Exception ex) {
                         // Ignorar si el formato es incorrecto
                     }
                 }
 
-                participacion.setVueltaRapida(chkVueltaRapida.isSelected());
-                // Recalcular puntos si tiene vuelta rápida
-                controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
-
                 actualizarTablaParticipaciones();
+                actualizarTablaCarreras(); // Actualizar también la tabla de carreras
+
+                // Mostrar mensaje de confirmación con los puntos obtenidos
+                String mensaje = String.format("Resultado guardado exitosamente!\n\n" +
+                        "Piloto: %s\n" +
+                        "Posición: %s\n" +
+                        "Puntos obtenidos: %d%s",
+                        participacion.getPiloto().getNombreCompleto(),
+                        participacion.isAbandono() ? "DNF" : "P" + participacion.getPosicionFinal(),
+                        participacion.getPuntosObtenidos(),
+                        participacion.isVueltaRapida() ? " (incluye +1 por vuelta rápida)" : "");
+
+                JOptionPane.showMessageDialog(dialog, mensaje, "✅ Resultado Guardado",
+                        JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
 
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "La posición debe ser un número válido",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Error: " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -773,10 +858,10 @@ public class VentanaCarreras extends JFrame {
         panelBotones.add(btnGuardar);
         panelBotones.add(btnCancelar);
 
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        dialog.add(panelBotones, gbc);
+        dialog.add(panelInfo, BorderLayout.NORTH);
+        dialog.add(panelFormulario, BorderLayout.CENTER);
+        dialog.add(panelPuntos, BorderLayout.EAST);
+        dialog.add(panelBotones, BorderLayout.SOUTH);
 
         dialog.pack();
         dialog.setLocationRelativeTo(this);
@@ -784,7 +869,7 @@ public class VentanaCarreras extends JFrame {
     }
 
     /**
-     * Finaliza la carrera y calcula puntos
+     * Finaliza la carrera y calcula puntos de manera completa
      */
     private void finalizarCarrera() {
         if (carreraSeleccionada == null) {
@@ -804,30 +889,113 @@ public class VentanaCarreras extends JFrame {
             return;
         }
 
+        // Verificar que al menos un piloto tenga posición
+        boolean hayResultados = carreraSeleccionada.getParticipaciones().stream()
+                .anyMatch(p -> p.getPosicionFinal() > 0 || p.isAbandono());
+
+        if (!hayResultados) {
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "No hay resultados registrados para esta carrera.\n" +
+                            "¿Desea finalizar la carrera sin resultados?\n" +
+                            "(Los pilotos no obtendrán puntos)",
+                    "Finalizar sin resultados",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (respuesta != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        // Mostrar resumen antes de finalizar
+        StringBuilder resumenPrevio = new StringBuilder();
+        resumenPrevio.append("RESUMEN ANTES DE FINALIZAR\n");
+        resumenPrevio.append("==========================\n\n");
+        resumenPrevio.append("Carrera: ").append(carreraSeleccionada.getNombre()).append("\n");
+        resumenPrevio.append("Participantes: ").append(carreraSeleccionada.getParticipaciones().size()).append("\n\n");
+
+        // Mostrar participantes con posiciones
+        var participantesConPosicion = carreraSeleccionada.getParticipaciones().stream()
+                .filter(p -> p.getPosicionFinal() > 0)
+                .sorted((p1, p2) -> Integer.compare(p1.getPosicionFinal(), p2.getPosicionFinal()))
+                .toList();
+
+        if (!participantesConPosicion.isEmpty()) {
+            resumenPrevio.append("Pilotos con posición registrada:\n");
+            for (Participacion p : participantesConPosicion) {
+                int puntosEstimados = modelo.SistemaPuntuacion.getPuntosPorPosicion(p.getPosicionFinal());
+                if (p.isVueltaRapida() && p.getPosicionFinal() <= 10) {
+                    puntosEstimados += 1;
+                }
+                resumenPrevio.append(String.format("  P%d - %s (%d puntos)%s\n",
+                        p.getPosicionFinal(),
+                        p.getPiloto().getNombreCompleto(),
+                        puntosEstimados,
+                        p.isVueltaRapida() ? " + VR" : ""));
+            }
+        }
+
+        var abandonos = carreraSeleccionada.getParticipaciones().stream()
+                .filter(Participacion::isAbandono)
+                .toList();
+
+        if (!abandonos.isEmpty()) {
+            resumenPrevio.append("\nAbandonos registrados:\n");
+            for (Participacion p : abandonos) {
+                resumenPrevio.append(String.format("  DNF - %s\n", p.getPiloto().getNombreCompleto()));
+            }
+        }
+
         int confirmacion = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro que desea finalizar esta carrera?\nSe calcularán los puntos según las posiciones registradas.",
-                "Confirmar finalización",
-                JOptionPane.YES_NO_OPTION);
+                resumenPrevio.toString() +
+                        "\n¿Está seguro que desea FINALIZAR esta carrera?\n" +
+                        "Se asignarán los puntos definitivos según las posiciones registradas.\n" +
+                        "Esta acción no se puede deshacer.",
+                "🏁 Confirmar Finalización de Carrera",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
                 // Usar el método del gestor que valida y actualiza correctamente
                 gestor.finalizarCarrera(carreraSeleccionada);
+
+                // Actualizar tablas
                 actualizarTablaCarreras();
                 actualizarTablaParticipaciones();
 
-                // Mostrar resumen de resultados
+                // Mostrar resumen final de resultados
                 java.util.List<String> resultados = gestor.obtenerResumenResultados(carreraSeleccionada);
-                StringBuilder mensaje = new StringBuilder("Carrera finalizada exitosamente!\n\nResultados:\n");
+                StringBuilder mensaje = new StringBuilder("🏁 ¡CARRERA FINALIZADA EXITOSAMENTE! 🏁\n\n");
+                mensaje.append("🏆 RESULTADOS OFICIALES:\n");
+                mensaje.append("========================\n");
                 for (String resultado : resultados) {
                     mensaje.append(resultado).append("\n");
                 }
 
-                JOptionPane.showMessageDialog(this, mensaje.toString(), "Carrera Finalizada",
+                // Mostrar información adicional sobre puntos totales actualizados
+                mensaje.append("\n💰 PUNTOS DEL CAMPEONATO ACTUALIZADOS\n");
+                mensaje.append("====================================\n");
+                for (Participacion p : carreraSeleccionada.getResultados()) {
+                    mensaje.append(String.format("%s: %d puntos totales\n",
+                            p.getPiloto().getNombreCompleto(),
+                            p.getPiloto().getPuntosTotales()));
+                }
+
+                JTextArea textArea = new JTextArea(mensaje.toString());
+                textArea.setEditable(false);
+                textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(600, 400));
+
+                JOptionPane.showMessageDialog(this, scrollPane, "🏆 Carrera Finalizada",
                         JOptionPane.INFORMATION_MESSAGE);
 
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al finalizar carrera: " + e.getMessage(), "Error",
+                JOptionPane.showMessageDialog(this,
+                        "Error al finalizar carrera: " + e.getMessage() +
+                                "\n\nVerifique que las posiciones sean válidas y únicas.",
+                        "❌ Error de Finalización",
                         JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -976,5 +1144,67 @@ public class VentanaCarreras extends JFrame {
         boton.setForeground(Color.BLACK);
         boton.setBorder(BorderFactory.createRaisedBevelBorder());
         boton.setFocusPainted(true);
+    }
+
+    /**
+     * Establece resultados automáticos para testing rápido
+     */
+    private void establecerResultadosAutomaticos() {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione una carrera", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this, "La carrera ya está finalizada", "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        var participaciones = carreraSeleccionada.getParticipaciones();
+        if (participaciones.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay participaciones en esta carrera", "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int respuesta = JOptionPane.showConfirmDialog(this,
+                "¿Desea establecer resultados automáticos para esta carrera?\n" +
+                        "Esto asignará posiciones aleatorias a los participantes.",
+                "Resultados Automáticos",
+                JOptionPane.YES_NO_OPTION);
+
+        if (respuesta == JOptionPane.YES_OPTION) {
+            try {
+                // Convertir a lista y mezclar
+                java.util.List<Participacion> listaParticipaciones = new java.util.ArrayList<>(participaciones);
+                java.util.Collections.shuffle(listaParticipaciones);
+
+                // Asignar posiciones
+                for (int i = 0; i < listaParticipaciones.size(); i++) {
+                    Participacion p = listaParticipaciones.get(i);
+                    p.setPosicionFinal(i + 1);
+                    controlador.ValidadorFormula1.actualizarPuntosParticipacion(p);
+                }
+
+                // Asignar vuelta rápida al ganador
+                if (!listaParticipaciones.isEmpty()) {
+                    listaParticipaciones.get(0).setVueltaRapida(true);
+                    controlador.ValidadorFormula1.actualizarPuntosParticipacion(listaParticipaciones.get(0));
+                }
+
+                actualizarTablaParticipaciones();
+
+                JOptionPane.showMessageDialog(this,
+                        "✅ Resultados automáticos establecidos!\n" +
+                                "Puede editarlos individualmente antes de finalizar la carrera.",
+                        "Resultados Generados",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al establecer resultados: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 }
