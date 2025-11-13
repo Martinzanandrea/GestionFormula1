@@ -134,11 +134,12 @@ public class GranPremio {
         if (obj == null || getClass() != obj.getClass())
             return false;
         GranPremio granPremio = (GranPremio) obj;
-        return nombre.equals(granPremio.nombre) && fechaHora.equals(granPremio.fechaHora);
+        return nombre != null && nombre.equals(granPremio.nombre) &&
+                fechaHora != null && fechaHora.equals(granPremio.fechaHora);
     }
 
     @Override
     public int hashCode() {
-        return (nombre + fechaHora.toString()).hashCode();
+        return ((nombre != null ? nombre : "") + (fechaHora != null ? fechaHora.toString() : "")).hashCode();
     }
 }

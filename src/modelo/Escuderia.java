@@ -62,6 +62,15 @@ public class Escuderia {
     }
 
     /**
+     * Remueve un mecánico de la escudería
+     * 
+     * @param mecanico Mecánico a remover
+     */
+    public void removerMecanico(Mecanico mecanico) {
+        mecanicos.remove(mecanico);
+    }
+
+    /**
      * Agrega un auto a la escudería
      * 
      * @param auto Auto a agregar
@@ -70,6 +79,15 @@ public class Escuderia {
         if (!autos.contains(auto)) {
             autos.add(auto);
         }
+    }
+
+    /**
+     * Remueve un auto de la escudería
+     * 
+     * @param auto Auto a remover
+     */
+    public void removerAuto(Auto auto) {
+        autos.remove(auto);
     }
 
     // Getters y Setters
@@ -103,7 +121,7 @@ public class Escuderia {
 
     @Override
     public String toString() {
-        return nombre + " - " + pais.getNombre();
+        return nombre + " - " + (pais != null ? pais.getNombre() : "Sin país");
     }
 
     @Override
@@ -113,11 +131,11 @@ public class Escuderia {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Escuderia escuderia = (Escuderia) obj;
-        return nombre.equals(escuderia.nombre);
+        return nombre != null && nombre.equals(escuderia.nombre);
     }
 
     @Override
     public int hashCode() {
-        return nombre.hashCode();
+        return nombre != null ? nombre.hashCode() : 0;
     }
 }

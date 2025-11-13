@@ -193,11 +193,11 @@ public class Auto {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Auto auto = (Auto) obj;
-        return numeroChasis.equals(auto.numeroChasis);
+        return numeroChasis != null && numeroChasis.equals(auto.numeroChasis);
     }
 
     @Override
     public int hashCode() {
-        return numeroChasis.hashCode();
+        return numeroChasis != null ? numeroChasis.hashCode() : 0;
     }
 }

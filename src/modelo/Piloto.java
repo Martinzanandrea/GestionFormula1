@@ -5,20 +5,14 @@ package modelo;
  * <p>
  * Esta clase encapsula toda la información relacionada con un piloto de F1,
  * incluyendo datos personales, estadísticas de carrera, número asignado,
- * experiencia y afiliación a una escudería.
+ * experiencia y afiliación a una escudería con sus fechas correspondientes.
  * </p>
  * 
  * @author Sistema de Gestión F1
  * @version 1.0
  * @since 1.0
  */
-public class Piloto {
-    /** Nombre del piloto */
-    private String nombre;
-
-    /** Apellido del piloto */
-    private String apellido;
-
+public class Piloto extends Persona {
     /** Edad del piloto en años */
     private int edad;
 
@@ -44,6 +38,8 @@ public class Piloto {
      * Los puntos totales se inicializan en cero.
      * </p>
      * 
+     * @param dni          Documento Nacional de Identidad (no puede ser null o
+     *                     vacío)
      * @param nombre       Nombre del piloto (no puede ser null o vacío)
      * @param apellido     Apellido del piloto (no puede ser null o vacío)
      * @param edad         Edad del piloto (debe estar entre 18 y 50 años)
@@ -54,11 +50,25 @@ public class Piloto {
      * @throws IllegalArgumentException si algún parámetro no cumple las
      *                                  validaciones
      */
-    public Piloto(String nombre, String apellido, int edad, String nacionalidad, int numero, int experiencia) {
-        this.nombre = nombre;
-        this.apellido = apellido;
+    public Piloto(String dni, String nombre, String apellido, int edad, String nacionalidad, int numero,
+            int experiencia) {
+        super(dni, nombre, apellido);
+
+        if (edad < 18 || edad > 50) {
+            throw new IllegalArgumentException("La edad debe estar entre 18 y 50 años");
+        }
+        if (nacionalidad == null || nacionalidad.trim().isEmpty()) {
+            throw new IllegalArgumentException("La nacionalidad no puede estar vacía");
+        }
+        if (numero < 1 || numero > 99) {
+            throw new IllegalArgumentException("El número debe estar entre 1 y 99");
+        }
+        if (experiencia < 0) {
+            throw new IllegalArgumentException("La experiencia no puede ser negativa");
+        }
+
         this.edad = edad;
-        this.nacionalidad = nacionalidad;
+        this.nacionalidad = nacionalidad.trim();
         this.numero = numero;
         this.experiencia = experiencia;
         this.puntosTotales = 0;
@@ -82,22 +92,6 @@ public class Piloto {
     }
 
     // Getters y Setters
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
     public int getEdad() {
         return edad;
     }
@@ -147,22 +141,13 @@ public class Piloto {
     }
 
     /**
-     * Obtiene el nombre completo del piloto concatenando nombre y apellido.
-     * 
-     * @return Nombre completo del piloto en formato "Nombre Apellido"
-     */
-    public String getNombreCompleto() {
-        return nombre + " " + apellido;
-    }
-
-    /**
      * Representación textual del piloto mostrando número, nombre y nacionalidad.
      * 
      * @return Cadena en formato "#número nombre completo (nacionalidad)"
      */
     @Override
     public String toString() {
-        return "#" + numero + " " + getNombreCompleto() + " (" + nacionalidad + ")";
+        return "#" + numero + " " + getNombre() + " " + getApellido() + " (" + nacionalidad + ")";
     }
 
     /**

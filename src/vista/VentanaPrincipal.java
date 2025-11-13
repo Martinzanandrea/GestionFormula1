@@ -101,12 +101,20 @@ public class VentanaPrincipal extends JFrame {
     private JPanel crearPanelNavegacion() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
         // Panel principal con lista apilada
         JPanel panelLista = new JPanel();
         panelLista.setLayout(new BoxLayout(panelLista, BoxLayout.Y_AXIS));
         panelLista.setBackground(Color.WHITE);
+
+        // Agregar scroll para evitar superposiciones
+        JScrollPane scrollPane = new JScrollPane(panelLista);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        scrollPane.setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
         // Título
         JLabel titulo = new JLabel("MENÚ PRINCIPAL");
@@ -134,6 +142,8 @@ public class VentanaPrincipal extends JFrame {
 
         // Sección Operaciones
         panelLista.add(crearSeparador("OPERACIONES"));
+        panelLista.add(crearOpcionLista("Gestión de Contratos", "Administrar contratos piloto-escudería",
+                e -> abrirGestionContratos()));
         panelLista.add(crearOpcionLista("Gestión de Carreras", "Planificar y administrar Grandes Premios",
                 e -> abrirGestionCarreras()));
         panelLista.add(
@@ -149,7 +159,7 @@ public class VentanaPrincipal extends JFrame {
         // Agregar espacio flexible al final
         panelLista.add(Box.createVerticalGlue());
 
-        panel.add(panelLista, BorderLayout.CENTER);
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
     }
 
@@ -177,8 +187,10 @@ public class VentanaPrincipal extends JFrame {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 220, 220)),
-                BorderFactory.createEmptyBorder(12, 15, 12, 15)));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+                BorderFactory.createEmptyBorder(15, 18, 15, 18)));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
+        panel.setMinimumSize(new Dimension(400, 75));
+        panel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 75));
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         // Contenido
@@ -224,7 +236,7 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelConEspacio = new JPanel(new BorderLayout());
         panelConEspacio.setBackground(Color.WHITE);
         panelConEspacio.add(panel, BorderLayout.CENTER);
-        panelConEspacio.add(Box.createRigidArea(new Dimension(0, 5)), BorderLayout.SOUTH);
+        panelConEspacio.add(Box.createRigidArea(new Dimension(0, 8)), BorderLayout.SOUTH);
 
         return panelConEspacio;
     }
@@ -235,10 +247,10 @@ public class VentanaPrincipal extends JFrame {
     private JPanel crearPanelInformacion() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        panel.setPreferredSize(new Dimension(250, 0));
+        panel.setPreferredSize(new Dimension(320, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 220, 220)),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
 
         // Panel principal
         JPanel contenido = new JPanel(new BorderLayout());
@@ -353,10 +365,10 @@ public class VentanaPrincipal extends JFrame {
     private void configurarVentana() {
         setTitle("ESCUDERÍAS UNIDAS - Sistema Fórmula 1");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 700);
+        setSize(1200, 800);
         setLocationRelativeTo(null);
         setResizable(true);
-        setMinimumSize(new Dimension(800, 600));
+        setMinimumSize(new Dimension(1000, 700));
 
         // Icono
         try {
@@ -414,6 +426,19 @@ public class VentanaPrincipal extends JFrame {
         SwingUtilities.invokeLater(() -> {
             VentanaCircuitos ventana = new VentanaCircuitos(gestor);
             ventana.setVisible(true);
+        });
+    }
+
+    private void abrirGestionContratos() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                VentanaContratos ventana = new VentanaContratos(gestor);
+                ventana.setVisible(true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        "Error al abrir gestión de contratos: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 

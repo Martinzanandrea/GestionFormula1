@@ -80,11 +80,12 @@ public class Circuito {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Circuito circuito = (Circuito) obj;
-        return nombre.equals(circuito.nombre) && pais.equals(circuito.pais);
+        return nombre != null && nombre.equals(circuito.nombre) &&
+                pais != null && pais.equals(circuito.pais);
     }
 
     @Override
     public int hashCode() {
-        return (nombre + pais.getNombre()).hashCode();
+        return (nombre + (pais != null ? pais.getNombre() : "")).hashCode();
     }
 }

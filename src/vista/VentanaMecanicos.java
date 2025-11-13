@@ -5,24 +5,36 @@ import modelo.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Ventana para la gestión de mecánicos
+ * Ventana completa para la gestión de mecánicos de Fórmula 1
+ * Permite crear mecánicos, asignar/desasignar de escuderías y gestionar
+ * especialidades
  */
 public class VentanaMecanicos extends JFrame {
     private GestorFormula1 gestor;
     private JTable tablaMecanicos;
     private DefaultTableModel modeloTabla;
-    private JTextField txtNombre, txtApellido, txtExperiencia;
-    private JList<Especialidad> listaEspecialidades;
-    private DefaultListModel<Especialidad> modeloEspecialidades;
-    private JComboBox<Especialidad> comboEspecialidades;
+
+    // Campos del formulario
+    private JTextField txtDni, txtNombre, txtApellido, txtExperiencia;
+    private JComboBox<String> cmbEscuderia;
+    private JList<String> listaEspecialidades;
+    private DefaultListModel<String> modeloEspecialidades;
+
+    // Botones
+    private JButton btnCrearMecanico, btnAsignarEscuderia, btnDesasignarEscuderia;
+    private JButton btnAgregarEspecialidad, btnRemoverEspecialidad, btnActualizarEspecialidades, btnLimpiar, btnCerrar;
+
+    // Mecánico seleccionado
+    private Mecanico mecanicoSeleccionado;
 
     /**
      * Constructor de la ventana de mecánicos
-     * 
-     * @param gestor Gestor principal del sistema
      */
     public VentanaMecanicos(GestorFormula1 gestor) {
         this.gestor = gestor;
@@ -39,6 +51,7 @@ public class VentanaMecanicos extends JFrame {
 
         // Panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Panel de formulario
         JPanel panelFormulario = crearPanelFormulario();
@@ -57,93 +70,124 @@ public class VentanaMecanicos extends JFrame {
     }
 
     /**
-     * Crea el panel de formulario para agregar/editar mecánicos
+     * Crea el panel de formulario
      */
     private JPanel crearPanelFormulario() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Datos del Mecánico"));
+        panel.setBorder(BorderFactory.createTitledBorder("Gestión de Mecánicos"));
 
-        // Panel de datos básicos
+        // Panel izquierdo - datos personales
         JPanel panelDatos = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
+        // Inicializar campos
+        txtDni = new JTextField(15);
+        txtNombre = new JTextField(15);
+        txtApellido = new JTextField(15);
+        txtExperiencia = new JTextField(15);
+        cmbEscuderia = new JComboBox<>();
+
+        // Primera fila
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panelDatos.add(new JLabel("Nombre:"), gbc);
+        panelDatos.add(new JLabel("DNI:"), gbc);
         gbc.gridx = 1;
-        txtNombre = new JTextField();
-        txtNombre.setPreferredSize(new Dimension(200, 35));
-        txtNombre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        panelDatos.add(txtDni, gbc);
+        gbc.gridx = 2;
+        panelDatos.add(new JLabel("Nombre:"), gbc);
+        gbc.gridx = 3;
         panelDatos.add(txtNombre, gbc);
 
-        gbc.gridx = 2;
-        panelDatos.add(new JLabel("Apellido:"), gbc);
-        gbc.gridx = 3;
-        txtApellido = new JTextField();
-        txtApellido.setPreferredSize(new Dimension(200, 35));
-        txtApellido.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        panelDatos.add(txtApellido, gbc);
-
+        // Segunda fila
         gbc.gridx = 0;
         gbc.gridy = 1;
-        panelDatos.add(new JLabel("Experiencia (años):"), gbc);
+        panelDatos.add(new JLabel("Apellido:"), gbc);
         gbc.gridx = 1;
-        txtExperiencia = new JTextField();
-        txtExperiencia.setPreferredSize(new Dimension(200, 35));
-        txtExperiencia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        panelDatos.add(txtApellido, gbc);
+        gbc.gridx = 2;
+        panelDatos.add(new JLabel("Experiencia (años):"), gbc);
+        gbc.gridx = 3;
         panelDatos.add(txtExperiencia, gbc);
 
-        // Panel de especialidades
-        JPanel panelEspecialidades = new JPanel(new BorderLayout());
-        panelEspecialidades.setBorder(BorderFactory.createTitledBorder("Especialidades"));
+        // Tercera fila
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panelDatos.add(new JLabel("Escudería:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridwidth = 3;
+        panelDatos.add(cmbEscuderia, gbc);
 
-        modeloEspecialidades = new DefaultListModel<>();
-        listaEspecialidades = new JList<>(modeloEspecialidades);
-        listaEspecialidades.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Panel derecho - especialidades
+        JPanel panelEspecialidades = crearPanelEspecialidades();
 
-        JScrollPane scrollEspecialidades = new JScrollPane(listaEspecialidades);
-        scrollEspecialidades.setPreferredSize(new Dimension(200, 120));
-
-        // Panel para agregar especialidades
-        JPanel panelAgregarEsp = new JPanel(new BorderLayout());
-        comboEspecialidades = new JComboBox<>(Especialidad.values());
-        JButton btnAgregarEsp = new JButton("Agregar");
-        JButton btnRemoverEsp = new JButton("Remover");
-
-        // Aplicar estilos a botones pequeños
-        aplicarEstiloBotonPequeno(btnAgregarEsp);
-        aplicarEstiloBotonPequeno(btnRemoverEsp);
-
-        btnAgregarEsp.addActionListener(e -> agregarEspecialidad());
-        btnRemoverEsp.addActionListener(e -> removerEspecialidad());
-
-        JPanel panelBotonesEsp = new JPanel(new FlowLayout());
-        panelBotonesEsp.add(btnAgregarEsp);
-        panelBotonesEsp.add(btnRemoverEsp);
-
-        panelAgregarEsp.add(new JLabel("Especialidad:"), BorderLayout.WEST);
-        panelAgregarEsp.add(comboEspecialidades, BorderLayout.CENTER);
-        panelAgregarEsp.add(panelBotonesEsp, BorderLayout.EAST);
-
-        panelEspecialidades.add(scrollEspecialidades, BorderLayout.CENTER);
-        panelEspecialidades.add(panelAgregarEsp, BorderLayout.SOUTH);
-
-        panel.add(panelDatos, BorderLayout.NORTH);
-        panel.add(panelEspecialidades, BorderLayout.CENTER);
+        panel.add(panelDatos, BorderLayout.WEST);
+        panel.add(panelEspecialidades, BorderLayout.EAST);
 
         return panel;
     }
 
     /**
-     * Crea el panel de tabla para mostrar los mecánicos
+     * Crea el panel de especialidades
+     */
+    private JPanel crearPanelEspecialidades() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Especialidades"));
+
+        // Lista de especialidades
+        modeloEspecialidades = new DefaultListModel<>();
+        listaEspecialidades = new JList<>(modeloEspecialidades);
+        listaEspecialidades.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaEspecialidades.setVisibleRowCount(4);
+
+        JScrollPane scrollEspecialidades = new JScrollPane(listaEspecialidades);
+        scrollEspecialidades.setPreferredSize(new Dimension(200, 100));
+
+        // ComboBox para agregar especialidades
+        JComboBox<String> cmbNuevaEspecialidad = new JComboBox<>();
+        for (Especialidad esp : Especialidad.values()) {
+            cmbNuevaEspecialidad.addItem(esp.getDescripcion());
+        }
+
+        // Botones de especialidades
+        btnAgregarEspecialidad = new JButton("Agregar");
+        btnRemoverEspecialidad = new JButton("Remover");
+
+        btnAgregarEspecialidad.addActionListener(e -> {
+            String especialidadSeleccionada = (String) cmbNuevaEspecialidad.getSelectedItem();
+            if (especialidadSeleccionada != null && !modeloEspecialidades.contains(especialidadSeleccionada)) {
+                modeloEspecialidades.addElement(especialidadSeleccionada);
+            }
+        });
+
+        btnRemoverEspecialidad.addActionListener(e -> {
+            String especialidadSeleccionada = listaEspecialidades.getSelectedValue();
+            if (especialidadSeleccionada != null) {
+                modeloEspecialidades.removeElement(especialidadSeleccionada);
+            }
+        });
+
+        JPanel panelControlesEsp = new JPanel(new FlowLayout());
+        panelControlesEsp.add(cmbNuevaEspecialidad);
+        panelControlesEsp.add(btnAgregarEspecialidad);
+        panelControlesEsp.add(btnRemoverEspecialidad);
+
+        panel.add(scrollEspecialidades, BorderLayout.CENTER);
+        panel.add(panelControlesEsp, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    /**
+     * Crea el panel de tabla
      */
     private JPanel crearPanelTabla() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Lista de Mecánicos"));
+        panel.setBorder(BorderFactory.createTitledBorder("Mecánicos Registrados"));
 
         // Crear modelo de tabla
-        String[] columnas = { "Nombre", "Apellido", "Experiencia", "Especialidades", "Escudería" };
+        String[] columnas = { "DNI", "Nombre", "Apellido", "Experiencia", "Especialidades", "Escudería", "Estado" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -153,8 +197,6 @@ public class VentanaMecanicos extends JFrame {
 
         tablaMecanicos = new JTable(modeloTabla);
         tablaMecanicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // Agregar listener para selección
         tablaMecanicos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 cargarMecanicoSeleccionado();
@@ -163,8 +205,8 @@ public class VentanaMecanicos extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(tablaMecanicos);
         scrollPane.setPreferredSize(new Dimension(800, 250));
-
         panel.add(scrollPane, BorderLayout.CENTER);
+
         return panel;
     }
 
@@ -172,31 +214,27 @@ public class VentanaMecanicos extends JFrame {
      * Crea el panel de botones
      */
     private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JPanel panel = new JPanel(new FlowLayout());
 
-        JButton btnAgregar = new JButton("Agregar");
-        JButton btnModificar = new JButton("Modificar");
-        JButton btnEliminar = new JButton("Eliminar");
-        JButton btnLimpiar = new JButton("Limpiar");
-        JButton btnCerrar = new JButton("Cerrar");
+        btnCrearMecanico = new JButton("Crear Mecánico");
+        btnAsignarEscuderia = new JButton("Asignar a Escudería");
+        btnDesasignarEscuderia = new JButton("Desasignar de Escudería");
+        btnActualizarEspecialidades = new JButton("Actualizar Especialidades");
+        btnLimpiar = new JButton("Limpiar");
+        btnCerrar = new JButton("Cerrar");
 
-        // Aplicar estilos modernos a los botones
-        aplicarEstiloBoton(btnAgregar);
-        aplicarEstiloBoton(btnModificar);
-        aplicarEstiloBoton(btnEliminar);
-        aplicarEstiloBoton(btnLimpiar);
-        aplicarEstiloBoton(btnCerrar);
-
-        // Agregar listeners
-        btnAgregar.addActionListener(e -> agregarMecanico());
-        btnModificar.addActionListener(e -> modificarMecanico());
-        btnEliminar.addActionListener(e -> eliminarMecanico());
+        // Configurar acciones
+        btnCrearMecanico.addActionListener(e -> crearMecanico());
+        btnAsignarEscuderia.addActionListener(e -> asignarMecanicoAEscuderia());
+        btnDesasignarEscuderia.addActionListener(e -> desasignarMecanicoDeEscuderia());
+        btnActualizarEspecialidades.addActionListener(e -> actualizarEspecialidades());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
         btnCerrar.addActionListener(e -> dispose());
 
-        panel.add(btnAgregar);
-        panel.add(btnModificar);
-        panel.add(btnEliminar);
+        panel.add(btnCrearMecanico);
+        panel.add(btnAsignarEscuderia);
+        panel.add(btnDesasignarEscuderia);
+        panel.add(btnActualizarEspecialidades);
         panel.add(btnLimpiar);
         panel.add(btnCerrar);
 
@@ -204,20 +242,35 @@ public class VentanaMecanicos extends JFrame {
     }
 
     /**
-     * Configura la ventana
+     * Configura las propiedades de la ventana
      */
     private void configurarVentana() {
         setTitle("Gestión de Mecánicos");
-        setSize(900, 700);
-        setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setResizable(true);
+        pack();
+        setLocationRelativeTo(null);
     }
 
     /**
      * Carga los datos iniciales
      */
     private void cargarDatos() {
+        cargarEscuderias();
         actualizarTablaMecanicos();
+    }
+
+    /**
+     * Carga las escuderías en el combo box
+     */
+    private void cargarEscuderias() {
+        cmbEscuderia.removeAllItems();
+        cmbEscuderia.addItem("Sin asignar");
+
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            cmbEscuderia.addItem(escuderia.getNombre());
+        }
     }
 
     /**
@@ -225,204 +278,315 @@ public class VentanaMecanicos extends JFrame {
      */
     private void actualizarTablaMecanicos() {
         modeloTabla.setRowCount(0);
-        for (Mecanico mecanico : gestor.getMecanicos()) {
-            // Buscar escudería del mecánico
-            String escuderia = "Sin escudería";
-            for (Escuderia e : gestor.getEscuderias()) {
-                if (e.getMecanicos().contains(mecanico)) {
-                    escuderia = e.getNombre();
+        List<Mecanico> mecanicos = gestor.getMecanicos();
+        List<Escuderia> escuderias = gestor.getEscuderias();
+
+        for (Mecanico mecanico : mecanicos) {
+            String escuderiaAsignada = "Libre";
+
+            // Buscar si el mecánico está asignado a alguna escudería
+            for (Escuderia escuderia : escuderias) {
+                if (escuderia.getMecanicos().contains(mecanico)) {
+                    escuderiaAsignada = escuderia.getNombre();
                     break;
                 }
             }
 
+            String especialidades = String.join(", ",
+                    mecanico.getEspecialidades().stream()
+                            .map(Especialidad::getDescripcion)
+                            .toArray(String[]::new));
+
             Object[] fila = {
+                    mecanico.getDni(),
                     mecanico.getNombre(),
                     mecanico.getApellido(),
-                    mecanico.getExperiencia(),
-                    mecanico.getEspecialidadesString(),
-                    escuderia
+                    mecanico.getExperiencia() + " años",
+                    especialidades.isEmpty() ? "Sin especialidades" : especialidades,
+                    escuderiaAsignada,
+                    escuderiaAsignada.equals("Libre") ? "Disponible" : "Asignado"
             };
             modeloTabla.addRow(fila);
         }
     }
 
     /**
-     * Carga los datos del mecánico seleccionado en el formulario
+     * Carga el mecánico seleccionado en el formulario
      */
     private void cargarMecanicoSeleccionado() {
         int filaSeleccionada = tablaMecanicos.getSelectedRow();
         if (filaSeleccionada >= 0) {
-            String nombre = (String) modeloTabla.getValueAt(filaSeleccionada, 0);
-            String apellido = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
+            List<Mecanico> mecanicos = gestor.getMecanicos();
+            mecanicoSeleccionado = mecanicos.get(filaSeleccionada);
 
-            Mecanico mecanico = gestor.getMecanicos().stream()
-                    .filter(m -> m.getNombre().equals(nombre) && m.getApellido().equals(apellido))
-                    .findFirst().orElse(null);
+            txtDni.setText(mecanicoSeleccionado.getDni());
+            txtNombre.setText(mecanicoSeleccionado.getNombre());
+            txtApellido.setText(mecanicoSeleccionado.getApellido());
+            txtExperiencia.setText(String.valueOf(mecanicoSeleccionado.getExperiencia()));
 
-            if (mecanico != null) {
-                txtNombre.setText(mecanico.getNombre());
-                txtApellido.setText(mecanico.getApellido());
-                txtExperiencia.setText(String.valueOf(mecanico.getExperiencia()));
+            // Cargar especialidades
+            modeloEspecialidades.clear();
+            for (Especialidad esp : mecanicoSeleccionado.getEspecialidades()) {
+                modeloEspecialidades.addElement(esp.getDescripcion());
+            }
 
-                // Cargar especialidades
-                modeloEspecialidades.clear();
-                for (Especialidad especialidad : mecanico.getEspecialidades()) {
-                    modeloEspecialidades.addElement(especialidad);
+            // Buscar la escudería asignada
+            String escuderiaAsignada = "Sin asignar";
+            List<Escuderia> escuderias = gestor.getEscuderias();
+            for (Escuderia escuderia : escuderias) {
+                if (escuderia.getMecanicos().contains(mecanicoSeleccionado)) {
+                    escuderiaAsignada = escuderia.getNombre();
+                    break;
                 }
             }
+            cmbEscuderia.setSelectedItem(escuderiaAsignada);
         }
     }
 
     /**
-     * Agrega una especialidad a la lista
+     * Crea un nuevo mecánico
      */
-    private void agregarEspecialidad() {
-        Especialidad especialidad = (Especialidad) comboEspecialidades.getSelectedItem();
-        if (especialidad != null && !modeloEspecialidades.contains(especialidad)) {
-            modeloEspecialidades.addElement(especialidad);
-        } else if (especialidad != null && modeloEspecialidades.contains(especialidad)) {
-            JOptionPane.showMessageDialog(this, "La especialidad ya está en la lista", "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    /**
-     * Remueve una especialidad de la lista
-     */
-    private void removerEspecialidad() {
-        Especialidad especialidadSeleccionada = listaEspecialidades.getSelectedValue();
-        if (especialidadSeleccionada != null) {
-            modeloEspecialidades.removeElement(especialidadSeleccionada);
-        } else {
-            JOptionPane.showMessageDialog(this, "Seleccione una especialidad para remover", "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    /**
-     * Agrega un nuevo mecánico
-     */
-    private void agregarMecanico() {
+    private void crearMecanico() {
         try {
-            validarCampos();
+            validarCamposMecanico();
 
+            String dni = txtDni.getText().trim();
             String nombre = txtNombre.getText().trim();
             String apellido = txtApellido.getText().trim();
             int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
 
-            Mecanico nuevoMecanico = new Mecanico(nombre, apellido, experiencia);
+            Mecanico nuevoMecanico = new Mecanico(dni, nombre, apellido, experiencia);
 
-            // Agregar especialidades
-            for (int i = 0; i < modeloEspecialidades.size(); i++) {
-                nuevoMecanico.agregarEspecialidad(modeloEspecialidades.getElementAt(i));
+            // Agregar especialidades seleccionadas
+            for (int i = 0; i < modeloEspecialidades.getSize(); i++) {
+                String descripcionEsp = modeloEspecialidades.getElementAt(i);
+                Especialidad especialidad = buscarEspecialidadPorDescripcion(descripcionEsp);
+                if (especialidad != null) {
+                    nuevoMecanico.agregarEspecialidad(especialidad);
+                }
             }
 
             gestor.registrarMecanico(nuevoMecanico);
 
-            actualizarTablaMecanicos();
-            limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this, "Mecánico agregado exitosamente", "Éxito",
+            JOptionPane.showMessageDialog(this,
+                    "Mecánico creado exitosamente.",
+                    "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
+            limpiarFormulario();
+            actualizarTablaMecanicos();
+
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
+            JOptionPane.showMessageDialog(this,
+                    "Error en el campo experiencia. Debe ser un número entero.",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al agregar mecánico: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "Error al crear el mecánico: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
-     * Modifica el mecánico seleccionado
+     * Asigna un mecánico a una escudería
      */
-    private void modificarMecanico() {
-        int filaSeleccionada = tablaMecanicos.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un mecánico para modificar", "Advertencia",
+    private void asignarMecanicoAEscuderia() {
+        if (mecanicoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar un mecánico de la tabla.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String escuderiaSeleccionada = (String) cmbEscuderia.getSelectedItem();
+        if (escuderiaSeleccionada == null || escuderiaSeleccionada.equals("Sin asignar")) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar una escudería.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Verificar si el mecánico ya está asignado
+        if (estaMecanicoAsignado(mecanicoSeleccionado)) {
+            JOptionPane.showMessageDialog(this,
+                    "El mecánico ya está asignado a una escudería.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Buscar la escudería
+        Escuderia escuderia = buscarEscuderiaPorNombre(escuderiaSeleccionada);
+        if (escuderia != null) {
+            escuderia.agregarMecanico(mecanicoSeleccionado);
+
+            JOptionPane.showMessageDialog(this,
+                    "Mecánico asignado exitosamente a " + escuderia.getNombre() + ".",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            actualizarTablaMecanicos();
+        }
+    }
+
+    /**
+     * Desasigna un mecánico de su escudería actual
+     */
+    private void desasignarMecanicoDeEscuderia() {
+        if (mecanicoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar un mecánico de la tabla.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Buscar la escudería a la que está asignado el mecánico
+        Escuderia escuderiaAsignada = null;
+        List<Escuderia> escuderias = gestor.getEscuderias();
+
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getMecanicos().contains(mecanicoSeleccionado)) {
+                escuderiaAsignada = escuderia;
+                break;
+            }
+        }
+
+        if (escuderiaAsignada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "El mecánico no está asignado a ninguna escudería.",
+                    "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de desasignar el mecánico de " + escuderiaAsignada.getNombre() + "?",
+                "Confirmar Desasignación",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            escuderiaAsignada.removerMecanico(mecanicoSeleccionado);
+
+            JOptionPane.showMessageDialog(this,
+                    "Mecánico desasignado exitosamente de " + escuderiaAsignada.getNombre() + ".",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            cmbEscuderia.setSelectedItem("Sin asignar");
+            actualizarTablaMecanicos();
+        }
+    }
+
+    /**
+     * Verifica si un mecánico está asignado a alguna escudería
+     */
+    private boolean estaMecanicoAsignado(Mecanico mecanico) {
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getMecanicos().contains(mecanico)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Busca una escudería por su nombre
+     */
+    private Escuderia buscarEscuderiaPorNombre(String nombre) {
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getNombre().equals(nombre)) {
+                return escuderia;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Busca una especialidad por su descripción
+     */
+    private Especialidad buscarEspecialidadPorDescripcion(String descripcion) {
+        for (Especialidad esp : Especialidad.values()) {
+            if (esp.getDescripcion().equals(descripcion)) {
+                return esp;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Valida los campos del formulario de mecánico
+     */
+    private void validarCamposMecanico() {
+        if (txtDni.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El DNI es obligatorio");
+        }
+        if (txtNombre.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre es obligatorio");
+        }
+        if (txtApellido.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El apellido es obligatorio");
+        }
+        if (txtExperiencia.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("La experiencia es obligatoria");
+        }
+
+        // Validar que el DNI sea único
+        String dni = txtDni.getText().trim();
+        List<Mecanico> mecanicos = gestor.getMecanicos();
+        for (Mecanico mecanico : mecanicos) {
+            if (mecanico.getDni().equals(dni) && mecanico != mecanicoSeleccionado) {
+                throw new IllegalArgumentException("Ya existe un mecánico con ese DNI");
+            }
+        }
+    }
+
+    /**
+     * Actualiza las especialidades de un mecánico existente
+     */
+    private void actualizarEspecialidades() {
+        if (mecanicoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar un mecánico de la tabla para actualizar sus especialidades.",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            validarCampos();
-
-            String nombreOriginal = (String) modeloTabla.getValueAt(filaSeleccionada, 0);
-            String apellidoOriginal = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
-
-            Mecanico mecanico = gestor.getMecanicos().stream()
-                    .filter(m -> m.getNombre().equals(nombreOriginal) && m.getApellido().equals(apellidoOriginal))
-                    .findFirst().orElse(null);
-
-            if (mecanico != null) {
-                mecanico.setNombre(txtNombre.getText().trim());
-                mecanico.setApellido(txtApellido.getText().trim());
-                mecanico.setExperiencia(Integer.parseInt(txtExperiencia.getText().trim()));
-
-                // Actualizar especialidades
-                // Primero remover todas las especialidades existentes
-                List<Especialidad> especialidadesActuales = mecanico.getEspecialidades();
-                for (Especialidad esp : especialidadesActuales) {
-                    mecanico.removerEspecialidad(esp);
-                }
-
-                // Agregar las nuevas especialidades
-                for (int i = 0; i < modeloEspecialidades.size(); i++) {
-                    mecanico.agregarEspecialidad(modeloEspecialidades.getElementAt(i));
-                }
-
-                actualizarTablaMecanicos();
-                JOptionPane.showMessageDialog(this, "Mecánico modificado exitosamente", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
+            // Limpiar especialidades actuales del mecánico
+            List<Especialidad> especialidadesActuales = new ArrayList<>(mecanicoSeleccionado.getEspecialidades());
+            for (Especialidad esp : especialidadesActuales) {
+                mecanicoSeleccionado.removerEspecialidad(esp);
             }
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            // Agregar las especialidades seleccionadas en la interfaz
+            for (int i = 0; i < modeloEspecialidades.getSize(); i++) {
+                String descripcionEsp = modeloEspecialidades.getElementAt(i);
+                Especialidad especialidad = buscarEspecialidadPorDescripcion(descripcionEsp);
+                if (especialidad != null) {
+                    mecanicoSeleccionado.agregarEspecialidad(especialidad);
+                }
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    "Especialidades del mecánico actualizadas exitosamente.",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            actualizarTablaMecanicos();
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al modificar mecánico: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "Error al actualizar especialidades: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    /**
-     * Elimina el mecánico seleccionado
-     */
-    private void eliminarMecanico() {
-        int filaSeleccionada = tablaMecanicos.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un mecánico para eliminar", "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int confirmacion = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro que desea eliminar este mecánico?",
-                "Confirmar eliminación",
-                JOptionPane.YES_NO_OPTION);
-
-        if (confirmacion == JOptionPane.YES_OPTION) {
-            String nombre = (String) modeloTabla.getValueAt(filaSeleccionada, 0);
-            String apellido = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
-
-            Mecanico mecanico = gestor.getMecanicos().stream()
-                    .filter(m -> m.getNombre().equals(nombre) && m.getApellido().equals(apellido))
-                    .findFirst().orElse(null);
-
-            if (mecanico != null) {
-                // Remover de escuderías
-                for (Escuderia escuderia : gestor.getEscuderias()) {
-                    escuderia.getMecanicos().remove(mecanico);
-                }
-
-                gestor.getMecanicos().remove(mecanico);
-                actualizarTablaMecanicos();
-                limpiarFormulario();
-
-                JOptionPane.showMessageDialog(this, "Mecánico eliminado exitosamente", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
         }
     }
 
@@ -430,66 +594,13 @@ public class VentanaMecanicos extends JFrame {
      * Limpia el formulario
      */
     private void limpiarFormulario() {
+        txtDni.setText("");
         txtNombre.setText("");
         txtApellido.setText("");
         txtExperiencia.setText("");
+        cmbEscuderia.setSelectedIndex(0);
         modeloEspecialidades.clear();
+        mecanicoSeleccionado = null;
         tablaMecanicos.clearSelection();
-    }
-
-    /**
-     * Valida los campos del formulario
-     */
-    private void validarCampos() {
-        if (txtNombre.getText().trim().isEmpty() ||
-                txtApellido.getText().trim().isEmpty() ||
-                txtExperiencia.getText().trim().isEmpty()) {
-
-            throw new IllegalArgumentException("Todos los campos básicos son obligatorios");
-        }
-
-        try {
-            int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
-            if (experiencia < 0 || experiencia > 50) {
-                throw new IllegalArgumentException("La experiencia debe estar entre 0 y 50 años");
-            }
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("La experiencia debe ser un valor numérico válido");
-        }
-
-        if (modeloEspecialidades.isEmpty()) {
-            throw new IllegalArgumentException("Debe agregar al menos una especialidad");
-        }
-    }
-
-    /**
-     * Aplica estilo moderno a los botones con alta visibilidad
-     */
-    private void aplicarEstiloBoton(JButton boton) {
-        // Tamaño estándar para todos los botones
-        boton.setPreferredSize(new Dimension(120, 40));
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
-
-        // Interfaz simple blanco y negro
-        boton.setBackground(Color.WHITE);
-        boton.setForeground(Color.BLACK);
-        boton.setBorder(BorderFactory.createRaisedBevelBorder());
-        boton.setFocusPainted(true);
-    }
-
-    /**
-     * Aplica estilo simple a botones pequeños
-     */
-    private void aplicarEstiloBotonPequeno(JButton boton) {
-        // Tamaño estándar para botones pequeños
-        boton.setPreferredSize(new Dimension(80, 30));
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 10));
-
-        // Interfaz simple blanco y negro
-        boton.setBackground(Color.WHITE);
-        boton.setForeground(Color.BLACK);
-        boton.setBorder(BorderFactory.createRaisedBevelBorder());
-        boton.setFocusPainted(true);
     }
 }

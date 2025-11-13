@@ -196,7 +196,7 @@ public class VentanaCircuitos extends JFrame {
      */
     private void configurarVentana() {
         setTitle("Gestión de Circuitos");
-        setSize(900, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

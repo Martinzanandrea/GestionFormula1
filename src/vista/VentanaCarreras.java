@@ -97,6 +97,7 @@ public class VentanaCarreras extends JFrame {
         panelFormulario.add(new JLabel("Fecha (dd/MM/yyyy):"), gbc);
         gbc.gridx = 1;
         txtFecha = new JTextField(20);
+        txtFecha.setToolTipText("📅 Formato: dd/MM/yyyy (ej: 25/12/2023). La fecha debe ser futura.");
         panelFormulario.add(txtFecha, gbc);
 
         gbc.gridx = 0;
@@ -104,7 +105,28 @@ public class VentanaCarreras extends JFrame {
         panelFormulario.add(new JLabel("Hora (HH:mm):"), gbc);
         gbc.gridx = 1;
         txtHora = new JTextField(20);
+        txtHora.setToolTipText("🕒 Formato: HH:mm (ej: 14:00 para las 2:00 PM)");
         panelFormulario.add(txtHora, gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        JButton btnHoyMas7 = new JButton("📅 +7 días");
+        btnHoyMas7.setPreferredSize(new Dimension(80, 25));
+        btnHoyMas7.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        btnHoyMas7.addActionListener(e -> {
+            LocalDateTime fechaFutura = LocalDateTime.now().plusDays(7);
+            txtFecha.setText(fechaFutura.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            txtHora.setText("15:00");
+        });
+        panelFormulario.add(btnHoyMas7, gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        JButton btnHoraDefecto = new JButton("🕒 15:00");
+        btnHoraDefecto.setPreferredSize(new Dimension(80, 25));
+        btnHoraDefecto.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        btnHoraDefecto.addActionListener(e -> txtHora.setText("15:00"));
+        panelFormulario.add(btnHoraDefecto, gbc);
 
         // Botones de planificación
         JPanel panelBotonesPlan = new JPanel(new FlowLayout());
@@ -163,18 +185,76 @@ public class VentanaCarreras extends JFrame {
     }
 
     /**
-     * Crea el panel de inscripción de pilotos
+     * Crea el panel de inscripción de pilotos mejorado
      */
     private JPanel crearPanelInscripcion() {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Panel de información de la carrera
-        JPanel panelInfoCarrera = new JPanel(new FlowLayout());
-        panelInfoCarrera.setBorder(BorderFactory.createTitledBorder("Seleccione una carrera en la primera pestaña"));
+        // Panel de información de la carrera seleccionada - más compacto
+        JPanel panelInfoCarrera = crearPanelInfoCarrera();
+        panelInfoCarrera.setPreferredSize(new Dimension(0, 120));
 
-        // Panel de inscripción
-        JPanel panelInscripcionForm = new JPanel(new GridBagLayout());
-        panelInscripcionForm.setBorder(BorderFactory.createTitledBorder("Inscribir Piloto"));
+        // Panel principal de inscripción dividido en dos
+        JPanel panelInscripcionPrincipal = new JPanel(new GridBagLayout());
+        panelInscripcionPrincipal.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // Panel izquierdo: Inscripción individual
+        JPanel panelInscripcionIndividual = crearPanelInscripcionIndividual();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.45;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(5, 5, 5, 10);
+        panelInscripcionPrincipal.add(panelInscripcionIndividual, gbc);
+
+        JPanel panelInscripcionMasiva = crearPanelInscripcionMasiva();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 0.55;
+        gbc.insets = new Insets(5, 10, 5, 5);
+        panelInscripcionPrincipal.add(panelInscripcionMasiva, gbc);
+
+        // Panel de tabla con altura fija para evitar superposición
+        JPanel panelTablaParticipaciones = crearPanelTablaParticipacionesMejorada();
+        panelTablaParticipaciones.setPreferredSize(new Dimension(0, 280));
+
+        panel.add(panelInfoCarrera, BorderLayout.NORTH);
+        panel.add(panelInscripcionPrincipal, BorderLayout.CENTER);
+        panel.add(panelTablaParticipaciones, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    /**
+     * Crea el panel de información de la carrera seleccionada
+     */
+    private JPanel crearPanelInfoCarrera() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("📍 Información de la Carrera Seleccionada"));
+        panel.setPreferredSize(new Dimension(0, 100));
+
+        JLabel lblInfoCarrera = new JLabel(
+                "<html><div style='text-align: center; padding: 8px;'>" +
+                        "<p style='font-size: 13px; color: #dc3545;'>⚠️ <b>No hay carrera seleccionada</b></p>" +
+                        "<p style='font-size: 11px; margin-top: 5px;'>Vaya a 'Planificar Carreras' → Seleccione una carrera → Regrese aquí</p>"
+                        +
+                        "</div></html>");
+        lblInfoCarrera.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(lblInfoCarrera, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Crea el panel de inscripción individual
+     */
+    private JPanel crearPanelInscripcionIndividual() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("🏎️ Inscripción Individual"));
+        panel.setPreferredSize(new Dimension(400, 300));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -182,32 +262,159 @@ public class VentanaCarreras extends JFrame {
         JComboBox<Piloto> comboPilotos = new JComboBox<>();
         JComboBox<Auto> comboAutos = new JComboBox<>();
 
+        // Hacer los combos más anchos
+        comboPilotos.setPreferredSize(new Dimension(280, 25));
+        comboAutos.setPreferredSize(new Dimension(280, 25));
+
+        // Campo piloto
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panelInscripcionForm.add(new JLabel("Piloto:"), gbc);
-        gbc.gridx = 1;
-        panelInscripcionForm.add(comboPilotos, gbc);
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(new JLabel("🏁 Seleccionar Piloto:"), gbc);
 
-        gbc.gridx = 0;
         gbc.gridy = 1;
-        panelInscripcionForm.add(new JLabel("Auto:"), gbc);
-        gbc.gridx = 1;
-        panelInscripcionForm.add(comboAutos, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        panel.add(comboPilotos, gbc);
 
-        JButton btnInscribir = new JButton("Inscribir Piloto");
-        aplicarEstiloBoton(btnInscribir);
-        gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        panelInscripcionForm.add(btnInscribir, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        panel.add(new JLabel("🚗 Seleccionar Auto:"), gbc);
 
-        btnInscribir.addActionListener(e -> inscribirPiloto(comboPilotos, comboAutos));
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        panel.add(comboAutos, gbc);
+
+        // Botón de inscripción
+        JButton btnInscribirIndividual = new JButton("✅ Inscribir Piloto");
+        btnInscribirIndividual.setPreferredSize(new Dimension(200, 35));
+        aplicarEstiloBoton(btnInscribirIndividual);
+
+        gbc.gridy = 4;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(btnInscribirIndividual, gbc);
+
+        // Información adicional - más compacta
+        JTextArea infoArea = new JTextArea(
+                "💡 Tip: Seleccione piloto y auto disponible para inscribir.", 2, 25);
+        infoArea.setEditable(false);
+        infoArea.setOpaque(false);
+        infoArea.setFont(new Font("Segoe UI", Font.ITALIC, 10));
+        infoArea.setLineWrap(true);
+        infoArea.setWrapStyleWord(true);
+
+        gbc.gridy = 5;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(infoArea, gbc);
+
+        btnInscribirIndividual.addActionListener(e -> inscribirPiloto(comboPilotos, comboAutos));
+
+        // Cargar datos iniciales
+        cargarPilotosYAutos(comboPilotos, comboAutos);
+
+        return panel;
+    }
+
+    /**
+     * Crea el panel de inscripción masiva
+     */
+    private JPanel crearPanelInscripcionMasiva() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("⚡ Inscripción Rápida Masiva"));
+        panel.setPreferredSize(new Dimension(500, 300));
+
+        // Lista de pilotos disponibles
+        JPanel panelLista = new JPanel(new BorderLayout());
+        panelLista.setBorder(BorderFactory.createTitledBorder("Pilotos Disponibles"));
+
+        String[] columnasPilotos = { "Piloto", "Escudería", "Puntos" };
+        DefaultTableModel modeloPilotosDisponibles = new DefaultTableModel(columnasPilotos, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable tablaPilotosDisponibles = new JTable(modeloPilotosDisponibles);
+        tablaPilotosDisponibles.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        tablaPilotosDisponibles.setRowHeight(20);
+
+        JScrollPane scrollPilotos = new JScrollPane(tablaPilotosDisponibles);
+        scrollPilotos.setPreferredSize(new Dimension(450, 180));
+
+        panelLista.add(scrollPilotos, BorderLayout.CENTER);
+
+        // Panel de botones de acción rápida - más compactos
+        JPanel panelBotonesRapidos = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
+        JButton btnInscribirSeleccionados = new JButton("📝 Inscribir Sel.");
+        JButton btnSeleccionAutomatica = new JButton("🎯 Selección Auto (10)");
+        JButton btnInscribirTodos = new JButton("🏁 Inscribir Todos");
+        JButton btnActualizar = new JButton("🔄 Actualizar");
+
+        // Hacer botones más pequeños
+        Dimension btnSize = new Dimension(110, 28);
+        btnInscribirSeleccionados.setPreferredSize(btnSize);
+        btnSeleccionAutomatica.setPreferredSize(new Dimension(130, 28));
+        btnInscribirTodos.setPreferredSize(btnSize);
+        btnActualizar.setPreferredSize(btnSize);
+
+        aplicarEstiloBoton(btnInscribirSeleccionados);
+        aplicarEstiloBoton(btnSeleccionAutomatica);
+        aplicarEstiloBoton(btnInscribirTodos);
+        aplicarEstiloBoton(btnActualizar);
+
+        btnInscribirSeleccionados.addActionListener(e -> inscribirPilotosSeleccionados(tablaPilotosDisponibles));
+        btnSeleccionAutomatica.addActionListener(e -> seleccionarYInscribirAutomaticamente(tablaPilotosDisponibles));
+        btnInscribirTodos.addActionListener(e -> inscribirTodosLosPilotos());
+        btnActualizar.addActionListener(e -> {
+            actualizarTablaPilotosDisponibles(modeloPilotosDisponibles);
+            actualizarTablaParticipaciones();
+        });
+
+        panelBotonesRapidos.add(btnInscribirSeleccionados);
+        panelBotonesRapidos.add(btnSeleccionAutomatica);
+        panelBotonesRapidos.add(btnInscribirTodos);
+        panelBotonesRapidos.add(btnActualizar);
+
+        panel.add(panelLista, BorderLayout.CENTER);
+        panel.add(panelBotonesRapidos, BorderLayout.SOUTH);
+
+        actualizarTablaPilotosDisponibles(modeloPilotosDisponibles);
+
+        return panel;
+    }
+
+    private JPanel crearPanelTablaParticipacionesMejorada() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setPreferredSize(new Dimension(0, 260));
+
+        JPanel panelInfoDinamica = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelInfoDinamica.setBorder(BorderFactory.createTitledBorder("📊 Estado de Inscripciones"));
+        panelInfoDinamica.setPreferredSize(new Dimension(0, 50));
+
+        JLabel lblContadorParticipantes = new JLabel("Participantes: 0");
+        JLabel lblLimiteParticipantes = new JLabel(" | Límite máximo: 20");
+        JLabel lblEspaciosDisponibles = new JLabel(" | Espacios disponibles: 20");
+
+        lblContadorParticipantes.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblEspaciosDisponibles.setFont(new Font("Segoe UI", Font.BOLD, 11));
+
+        panelInfoDinamica.add(lblContadorParticipantes);
+        panelInfoDinamica.add(lblLimiteParticipantes);
+        panelInfoDinamica.add(lblEspaciosDisponibles);
 
         // Tabla de participaciones
-        JPanel panelTablaParticipaciones = new JPanel(new BorderLayout());
-        panelTablaParticipaciones.setBorder(BorderFactory.createTitledBorder("🏎️ Participantes de la Carrera"));
+        JPanel panelTabla = new JPanel(new BorderLayout());
+        panelTabla.setBorder(BorderFactory.createTitledBorder("🏎️ Participantes Inscritos"));
 
-        String[] columnasParticipaciones = { "Pos.", "Piloto", "Escudería", "Auto", "Puntos", "Detalles" };
+        String[] columnasParticipaciones = { "Pos.", "Piloto", "Escudería", "Auto", "Puntos", "Estado" };
         modeloTablaParticipaciones = new DefaultTableModel(columnasParticipaciones, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -217,37 +424,41 @@ public class VentanaCarreras extends JFrame {
 
         tablaParticipaciones = new JTable(modeloTablaParticipaciones);
         tablaParticipaciones.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaParticipaciones.setRowHeight(18);
 
         JScrollPane scrollParticipaciones = new JScrollPane(tablaParticipaciones);
-        scrollParticipaciones.setPreferredSize(new Dimension(600, 250));
+        scrollParticipaciones.setPreferredSize(new Dimension(0, 120));
 
-        panelTablaParticipaciones.add(scrollParticipaciones, BorderLayout.CENTER);
+        panelTabla.add(scrollParticipaciones, BorderLayout.CENTER);
 
-        // Botones de gestión de participaciones
-        JPanel panelBotonesPartic = new JPanel(new FlowLayout());
-        JButton btnRemoverParticipacion = new JButton("Remover Inscripción");
-        JButton btnActualizarInscritos = new JButton("Actualizar Lista");
+        JPanel panelBotonesGestion = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 3));
+        panelBotonesGestion.setPreferredSize(new Dimension(0, 40));
 
-        // Aplicar estilos estándar
-        aplicarEstiloBoton(btnRemoverParticipacion);
-        aplicarEstiloBoton(btnActualizarInscritos);
+        JButton btnRemoverSeleccionado = new JButton("❌ Remover Sel.");
+        JButton btnRemoverTodos = new JButton("🗑️ Limpiar Todo");
+        JButton btnAsignarAutosAutomatico = new JButton("🔄 Asignar Autos");
 
-        btnRemoverParticipacion.addActionListener(e -> removerParticipacion());
-        btnActualizarInscritos.addActionListener(e -> {
-            cargarPilotosYAutos(comboPilotos, comboAutos);
-            actualizarTablaParticipaciones();
-        });
+        // Botones más compactos
+        Dimension btnSizeSmall = new Dimension(120, 30);
+        btnRemoverSeleccionado.setPreferredSize(btnSizeSmall);
+        btnRemoverTodos.setPreferredSize(btnSizeSmall);
+        btnAsignarAutosAutomatico.setPreferredSize(btnSizeSmall);
 
-        panelBotonesPartic.add(btnRemoverParticipacion);
-        panelBotonesPartic.add(btnActualizarInscritos);
+        aplicarEstiloBoton(btnRemoverSeleccionado);
+        aplicarEstiloBoton(btnRemoverTodos);
+        aplicarEstiloBoton(btnAsignarAutosAutomatico);
 
-        panel.add(panelInfoCarrera, BorderLayout.NORTH);
-        panel.add(panelInscripcionForm, BorderLayout.WEST);
-        panel.add(panelTablaParticipaciones, BorderLayout.CENTER);
-        panel.add(panelBotonesPartic, BorderLayout.SOUTH);
+        btnRemoverSeleccionado.addActionListener(e -> removerParticipacion());
+        btnRemoverTodos.addActionListener(e -> removerTodasLasParticipaciones());
+        btnAsignarAutosAutomatico.addActionListener(e -> asignarAutosAutomaticamente());
 
-        // Cargar datos iniciales
-        cargarPilotosYAutos(comboPilotos, comboAutos);
+        panelBotonesGestion.add(btnRemoverSeleccionado);
+        panelBotonesGestion.add(btnRemoverTodos);
+        panelBotonesGestion.add(btnAsignarAutosAutomatico);
+
+        panel.add(panelInfoDinamica, BorderLayout.NORTH);
+        panel.add(panelTabla, BorderLayout.CENTER);
+        panel.add(panelBotonesGestion, BorderLayout.SOUTH);
 
         return panel;
     }
@@ -275,7 +486,6 @@ public class VentanaCarreras extends JFrame {
 
         panelTablaResultados.add(scrollResultados, BorderLayout.CENTER);
 
-        // Agregar doble clic para editar resultados
         tablaParticipaciones.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
@@ -333,7 +543,7 @@ public class VentanaCarreras extends JFrame {
      */
     private void configurarVentana() {
         setTitle("Gestión de Carreras - Grandes Premios");
-        setSize(1000, 750);
+        setSize(1200, 850);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -369,6 +579,50 @@ public class VentanaCarreras extends JFrame {
 
         for (Auto auto : gestor.getAutos()) {
             comboAutos.addItem(auto);
+        }
+    }
+
+    /**
+     * Actualiza los combos de inscripción con pilotos y autos disponibles
+     */
+    private void actualizarCombosInscripcion() {
+        // Buscar los combos en el panel de inscripción individual y actualizarlos
+        Component tabComponent = pestanas.getComponentAt(1);
+        if (tabComponent instanceof Container) {
+            buscarYActualizarCombos((Container) tabComponent);
+        }
+    }
+
+    /**
+     * Método auxiliar para buscar y actualizar combos en contenedores
+     */
+    private void buscarYActualizarCombos(Container contenedor) {
+        for (Component comp : contenedor.getComponents()) {
+            if (comp instanceof JComboBox) {
+                JComboBox<?> combo = (JComboBox<?>) comp;
+                if (combo.getItemCount() > 0) {
+                    Object firstItem = combo.getItemAt(0);
+                    if (firstItem instanceof Piloto) {
+                        // Es combo de pilotos
+                        @SuppressWarnings("unchecked")
+                        JComboBox<Piloto> comboPilotos = (JComboBox<Piloto>) combo;
+                        comboPilotos.removeAllItems();
+                        for (Piloto piloto : gestor.getPilotos()) {
+                            comboPilotos.addItem(piloto);
+                        }
+                    } else if (firstItem instanceof Auto) {
+                        // Es combo de autos
+                        @SuppressWarnings("unchecked")
+                        JComboBox<Auto> comboAutos = (JComboBox<Auto>) combo;
+                        comboAutos.removeAllItems();
+                        for (Auto auto : gestor.getAutos()) {
+                            comboAutos.addItem(auto);
+                        }
+                    }
+                }
+            } else if (comp instanceof Container) {
+                buscarYActualizarCombos((Container) comp);
+            }
         }
     }
 
@@ -409,7 +663,6 @@ public class VentanaCarreras extends JFrame {
     private void actualizarTablaParticipaciones() {
         modeloTablaParticipaciones.setRowCount(0);
         if (carreraSeleccionada != null) {
-            // Obtener participaciones ordenadas por posición
             java.util.List<Participacion> participaciones = carreraSeleccionada.getParticipaciones()
                     .stream()
                     .sorted((p1, p2) -> {
@@ -425,49 +678,68 @@ public class VentanaCarreras extends JFrame {
                     })
                     .collect(java.util.stream.Collectors.toList());
 
+            int contador = 1;
             for (Participacion participacion : participaciones) {
                 String posicion;
-                String detalles = "";
+                String estado = "✅ Inscrito"; // Estado por defecto
 
                 if (participacion.isAbandono()) {
                     posicion = "DNF";
-                    detalles = "Abandono: "
+                    estado = "❌ Abandono: "
                             + (participacion.getMotivoAbandono() != null ? participacion.getMotivoAbandono()
                                     : "No especificado");
                 } else if (participacion.getPosicionFinal() > 0) {
                     posicion = "P" + participacion.getPosicionFinal();
-                    if (participacion.isVueltaRapida()) {
-                        detalles = "Vuelta más rápida";
-                    }
                     if (participacion.getPosicionFinal() == 1) {
-                        detalles += " 🏆 GANADOR";
+                        estado = "🏆 GANADOR";
                     } else if (participacion.getPosicionFinal() == 2) {
-                        detalles += " 🥈 Segundo";
+                        estado = "🥈 Segundo lugar";
                     } else if (participacion.getPosicionFinal() == 3) {
-                        detalles += " 🥉 Tercero";
+                        estado = "🥉 Tercer lugar";
+                    } else {
+                        estado = "🏁 Posición " + participacion.getPosicionFinal();
+                    }
+                    if (participacion.isVueltaRapida()) {
+                        estado += " + ⚡ V.Rápida";
                     }
                 } else {
-                    posicion = "-";
-                    detalles = carreraSeleccionada.isFinalizada() ? "No clasificado" : "Sin resultado";
+                    posicion = String.valueOf(contador);
+                    if (carreraSeleccionada.isFinalizada()) {
+                        estado = "⚠️ No clasificado";
+                    } else {
+                        estado = "✅ Listo para correr";
+                    }
                 }
+
+                // Obtener información de escudería
+                String escuderia = "Sin escudería";
+                if (participacion.getPiloto().getEscuderia() != null) {
+                    escuderia = participacion.getPiloto().getEscuderia().getNombre();
+                }
+
+                // Obtener información del auto
+                String autoInfo = participacion.getAuto().getModelo() + " (" + participacion.getAuto().getNumeroChasis()
+                        + ")";
 
                 Object[] fila = {
                         posicion,
                         participacion.getPiloto().getNombreCompleto(),
-                        participacion.getPiloto().getEscuderia() != null
-                                ? participacion.getPiloto().getEscuderia().getNombre()
-                                : "Sin escudería",
-                        participacion.getAuto().getModelo(),
+                        escuderia,
+                        autoInfo,
                         participacion.getPuntosObtenidos() + " pts",
-                        detalles
+                        estado
                 };
                 modeloTablaParticipaciones.addRow(fila);
+                contador++;
             }
         }
+
+        // Actualizar contadores dinámicos
+        actualizarContadoresParticipacion();
     }
 
     /**
-     * Carga la carrera seleccionada
+     * Carga la carrera seleccionada y actualiza la información contextual
      */
     private void cargarCarreraSeleccionada() {
         int filaSeleccionada = tablaCarreras.getSelectedRow();
@@ -484,11 +756,164 @@ public class VentanaCarreras extends JFrame {
                 txtFecha.setText(carreraSeleccionada.getFechaHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 txtHora.setText(carreraSeleccionada.getFechaHora().format(DateTimeFormatter.ofPattern("HH:mm")));
 
+                // Actualizar todas las vistas de datos
                 actualizarTablaParticipaciones();
+                actualizarInformacionCarreraSeleccionada();
 
-                // Actualizar título de la pestaña de inscripción
-                pestanas.setTitleAt(1, "Inscribir Pilotos - " + carreraSeleccionada.getNombre());
-                pestanas.setTitleAt(2, "Resultados - " + carreraSeleccionada.getNombre());
+                // Actualizar combos de pilotos y autos disponibles
+                actualizarCombosInscripcion();
+
+                int participantes = carreraSeleccionada.getParticipaciones().size();
+                String estadoCarrera = carreraSeleccionada.isFinalizada() ? "🏁 Finalizada" : "⏳ Programada";
+
+                // Actualizar títulos de pestañas con información dinámica
+                pestanas.setTitleAt(1, String.format("Inscribir Pilotos - %s (%d/20)",
+                        carreraSeleccionada.getNombre(), participantes));
+                pestanas.setTitleAt(2, String.format("Resultados - %s [%s]",
+                        carreraSeleccionada.getNombre(), estadoCarrera));
+            }
+        } else {
+            // No hay carrera seleccionada
+            carreraSeleccionada = null;
+            actualizarTablaParticipaciones();
+            pestanas.setTitleAt(1, "Inscribir Pilotos - Seleccione una carrera");
+            pestanas.setTitleAt(2, "Resultados - Seleccione una carrera");
+        }
+    }
+
+    /**
+     * Actualiza la información de la carrera seleccionada en el panel de
+     * inscripción
+     */
+    private void actualizarInformacionCarreraSeleccionada() {
+        // Buscar el panel de información y actualizar su contenido
+        Component tabComponent = pestanas.getComponentAt(1);
+        if (tabComponent instanceof Container) {
+            Container container = (Container) tabComponent;
+            Component[] components = container.getComponents();
+            for (Component comp : components) {
+                if (comp instanceof JPanel) {
+                    JPanel panel = (JPanel) comp;
+                    if (panel.getBorder() instanceof javax.swing.border.TitledBorder) {
+                        javax.swing.border.TitledBorder border = (javax.swing.border.TitledBorder) panel.getBorder();
+                        if (border.getTitle().contains("📍 Información de la Carrera")) {
+                            panel.removeAll();
+
+                            if (carreraSeleccionada != null) {
+                                String estado = carreraSeleccionada.isFinalizada() ? "🏁 Finalizada" : "⏳ Programada";
+                                String estadoColor = carreraSeleccionada.isFinalizada() ? "#dc3545" : "#28a745";
+                                int participantes = carreraSeleccionada.getParticipaciones().size();
+                                int espaciosDisponibles = 20 - participantes;
+
+                                String info = String.format(
+                                        "<html><div style='text-align: center; padding: 15px;'>" +
+                                                "<h3 style='color: #212529; margin: 0 0 10px 0;'>🏁 %s</h3>" +
+                                                "<div style='background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;'>"
+                                                +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>🏎️ Circuito:</b> %s</p>"
+                                                +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>🌍 País:</b> %s</p>" +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>📅 Fecha:</b> %s</p>" +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>⏰ Hora:</b> %s</p>" +
+                                                "</div>" +
+                                                "<div style='background: %s; color: white; padding: 8px; border-radius: 5px; margin: 10px 0;'>"
+                                                +
+                                                "<p style='margin: 0; font-weight: bold;'>%s</p>" +
+                                                "</div>" +
+                                                "<div style='background: #e9ecef; padding: 10px; border-radius: 5px;'>"
+                                                +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>👥 Participantes:</b> %d/20</p>"
+                                                +
+                                                "<p style='margin: 5px 0; font-size: 13px;'><b>🆓 Espacios disponibles:</b> %d</p>"
+                                                +
+                                                "</div>" +
+                                                "</div></html>",
+                                        carreraSeleccionada.getNombre(),
+                                        carreraSeleccionada.getCircuito().getNombre(),
+                                        carreraSeleccionada.getCircuito().getPais().getNombre(),
+                                        carreraSeleccionada.getFechaHora()
+                                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                        carreraSeleccionada.getFechaHora().format(DateTimeFormatter.ofPattern("HH:mm")),
+                                        estadoColor,
+                                        estado,
+                                        participantes,
+                                        espaciosDisponibles);
+
+                                JLabel lblInfo = new JLabel(info);
+                                lblInfo.setHorizontalAlignment(SwingConstants.CENTER);
+                                panel.add(lblInfo, BorderLayout.CENTER);
+
+                                if (!carreraSeleccionada.isFinalizada() && espaciosDisponibles > 0) {
+                                    JLabel lblAccion = new JLabel(
+                                            "<html><div style='text-align: center; margin-top: 10px;'>" +
+                                                    "<p style='color: #28a745; font-weight: bold;'>✅ Lista para inscripciones</p>"
+                                                    +
+                                                    "</div></html>");
+                                    lblAccion.setHorizontalAlignment(SwingConstants.CENTER);
+                                    panel.add(lblAccion, BorderLayout.SOUTH);
+                                } else if (carreraSeleccionada.isFinalizada()) {
+                                    JLabel lblAccion = new JLabel(
+                                            "<html><div style='text-align: center; margin-top: 10px;'>" +
+                                                    "<p style='color: #dc3545; font-weight: bold;'>🏁 Carrera finalizada</p>"
+                                                    +
+                                                    "</div></html>");
+                                    lblAccion.setHorizontalAlignment(SwingConstants.CENTER);
+                                    panel.add(lblAccion, BorderLayout.SOUTH);
+                                } else {
+                                    JLabel lblAccion = new JLabel(
+                                            "<html><div style='text-align: center; margin-top: 10px;'>" +
+                                                    "<p style='color: #ffc107; font-weight: bold;'>⚠️ Carrera llena</p>"
+                                                    +
+                                                    "</div></html>");
+                                    lblAccion.setHorizontalAlignment(SwingConstants.CENTER);
+                                    panel.add(lblAccion, BorderLayout.SOUTH);
+                                }
+                            } else {
+                                panel.add(crearPanelInfoCarrera().getComponent(0), BorderLayout.CENTER);
+                            }
+
+                            panel.revalidate();
+                            panel.repaint();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Actualiza los contadores de participación dinámicamente
+     */
+    private void actualizarContadoresParticipacion() {
+        // Buscar y actualizar los labels de contadores
+        Component tabComponent = pestanas.getComponentAt(1);
+        if (tabComponent instanceof Container) {
+            Container container = (Container) tabComponent;
+            actualizarContadoresEnContenedor(container);
+        }
+    }
+
+    /**
+     * Método auxiliar para actualizar contadores en un contenedor
+     */
+    private void actualizarContadoresEnContenedor(Container contenedor) {
+        for (Component comp : contenedor.getComponents()) {
+            if (comp instanceof JLabel) {
+                JLabel label = (JLabel) comp;
+                String texto = label.getText();
+                if (texto.startsWith("Participantes:")) {
+                    int participantes = carreraSeleccionada != null ? carreraSeleccionada.getParticipaciones().size()
+                            : 0;
+                    label.setText("Participantes: " + participantes);
+                } else if (texto.contains("Espacios disponibles:")) {
+                    int participantes = carreraSeleccionada != null ? carreraSeleccionada.getParticipaciones().size()
+                            : 0;
+                    int disponibles = 20 - participantes;
+                    label.setText(" | Espacios disponibles: " + disponibles);
+                }
+            } else if (comp instanceof Container) {
+                actualizarContadoresEnContenedor((Container) comp);
             }
         }
     }
@@ -504,17 +929,74 @@ public class VentanaCarreras extends JFrame {
             Circuito circuito = (Circuito) comboCircuitos.getSelectedItem();
             LocalDateTime fechaHora = parsearFechaHora();
 
+            // Validar que no exista una carrera con el mismo nombre
+            boolean nombreExiste = gestor.getGrandesPremios().stream()
+                    .anyMatch(gp -> gp.getNombre().equalsIgnoreCase(nombre));
+
+            if (nombreExiste) {
+                JOptionPane.showMessageDialog(this,
+                        "⚠️ Ya existe una carrera con ese nombre.\n\n" +
+                                "Por favor, elija un nombre diferente.\n" +
+                                "💡 Tip: Puede agregar año o temporada al nombre.",
+                        "Nombre duplicado",
+                        JOptionPane.WARNING_MESSAGE);
+                txtNombreCarrera.requestFocus();
+                return;
+            }
+
+            // Validar que no haya conflicto de horario en el mismo circuito
+            boolean conflictoHorario = gestor.getGrandesPremios().stream()
+                    .anyMatch(gp -> gp.getCircuito().equals(circuito) &&
+                            Math.abs(java.time.Duration.between(gp.getFechaHora(), fechaHora).toHours()) < 24);
+
+            if (conflictoHorario) {
+                int opcion = JOptionPane.showConfirmDialog(this,
+                        "⚠️ Advertencia: Hay una carrera programada en el mismo circuito\n" +
+                                "dentro de las 24 horas siguientes.\n\n" +
+                                "¿Desea continuar de todas formas?",
+                        "Posible conflicto de horario",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+
+                if (opcion != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            // Validar que la fecha no sea en el pasado (doble verificación)
+            if (fechaHora.isBefore(LocalDateTime.now())) {
+                JOptionPane.showMessageDialog(this,
+                        "❌ La fecha y hora de la carrera debe ser futura.\n\n" +
+                                "🗺 Fecha actual: "
+                                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n" +
+                                "🏁 Fecha seleccionada: "
+                                + fechaHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                        "Fecha inválida",
+                        JOptionPane.WARNING_MESSAGE);
+                txtFecha.requestFocus();
+                return;
+            }
+
             GranPremio nuevaCarrera = new GranPremio(nombre, fechaHora, circuito);
             gestor.registrarGranPremio(nuevaCarrera);
 
             actualizarTablaCarreras();
             limpiarFormularioPlanificacion();
 
-            JOptionPane.showMessageDialog(this, "Carrera planificada exitosamente", "Éxito",
+            JOptionPane.showMessageDialog(this,
+                    "✅ Carrera planificada exitosamente\n\n" +
+                            "📅 " + nombre + "\n" +
+                            "🏁 " + circuito.getNombre() + " (" + circuito.getPais().getNombre() + ")\n" +
+                            "⏰ " + fechaHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n\n" +
+                            "💡 Ya puedes inscribir pilotos en la pestaña correspondiente.",
+                    "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al planificar carrera: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ Error al planificar carrera:\n\n" + e.getMessage() + "\n\n" +
+                            "💡 Verifique que todos los campos estén correctos.",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -524,31 +1006,82 @@ public class VentanaCarreras extends JFrame {
      */
     private void modificarCarrera() {
         if (carreraSeleccionada == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una carrera para modificar", "Advertencia",
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera para modificar\n\n" +
+                            "💡 Haga clic en una fila de la tabla de carreras.",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         if (carreraSeleccionada.isFinalizada()) {
-            JOptionPane.showMessageDialog(this, "No se puede modificar una carrera finalizada", "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se puede modificar una carrera finalizada\n\n" +
+                            "🏁 Carrera: " + carreraSeleccionada.getNombre() + "\n" +
+                            "📅 Estado: Finalizada",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
+        }
+
+        // Verificar si hay participaciones inscritas
+        if (!carreraSeleccionada.getParticipaciones().isEmpty()) {
+            int opcion = JOptionPane.showConfirmDialog(this,
+                    "⚠️ Esta carrera ya tiene " + carreraSeleccionada.getParticipaciones().size()
+                            + " pilotos inscritos.\n\n" +
+                            "Al modificar la carrera, las inscripciones se mantendrán.\n" +
+                            "¿Desea continuar con la modificación?",
+                    "Confirmar modificación",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (opcion != JOptionPane.YES_OPTION) {
+                return;
+            }
         }
 
         try {
             validarCamposCarrera();
 
-            carreraSeleccionada.setNombre(txtNombreCarrera.getText().trim());
-            carreraSeleccionada.setCircuito((Circuito) comboCircuitos.getSelectedItem());
-            carreraSeleccionada.setFechaHora(parsearFechaHora());
+            String nuevoNombre = txtNombreCarrera.getText().trim();
+            Circuito nuevoCircuito = (Circuito) comboCircuitos.getSelectedItem();
+            LocalDateTime nuevaFechaHora = parsearFechaHora();
+
+            // Validar que no exista otra carrera con el mismo nombre (excluyendo la actual)
+            boolean nombreExiste = gestor.getGrandesPremios().stream()
+                    .anyMatch(gp -> !gp.equals(carreraSeleccionada) && gp.getNombre().equalsIgnoreCase(nuevoNombre));
+
+            if (nombreExiste) {
+                JOptionPane.showMessageDialog(this,
+                        "⚠️ Ya existe otra carrera con ese nombre.\n\n" +
+                                "Por favor, elija un nombre diferente.\n" +
+                                "💡 Tip: Puede agregar año o temporada al nombre.",
+                        "Nombre duplicado",
+                        JOptionPane.WARNING_MESSAGE);
+                txtNombreCarrera.requestFocus();
+                return;
+            }
+
+            carreraSeleccionada.setNombre(nuevoNombre);
+            carreraSeleccionada.setCircuito(nuevoCircuito);
+            carreraSeleccionada.setFechaHora(nuevaFechaHora);
 
             actualizarTablaCarreras();
+            actualizarInformacionCarreraSeleccionada();
 
-            JOptionPane.showMessageDialog(this, "Carrera modificada exitosamente", "Éxito",
+            JOptionPane.showMessageDialog(this,
+                    "✅ Carrera modificada exitosamente\n\n" +
+                            "📅 " + nuevoNombre + "\n" +
+                            "🏁 " + nuevoCircuito.getNombre() + " (" + nuevoCircuito.getPais().getNombre() + ")\n" +
+                            "⏰ " + nuevaFechaHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                    "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al modificar carrera: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ Error al modificar carrera:\n\n" + e.getMessage() + "\n\n" +
+                            "💡 Verifique que todos los campos estén correctos.",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -558,27 +1091,72 @@ public class VentanaCarreras extends JFrame {
      */
     private void eliminarCarrera() {
         if (carreraSeleccionada == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una carrera para eliminar", "Advertencia",
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera para eliminar\n\n" +
+                            "💡 Haga clic en una fila de la tabla de carreras.",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int confirmacion = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro que desea eliminar esta carrera?\nSe perderán todas las inscripciones.",
-                "Confirmar eliminación",
-                JOptionPane.YES_NO_OPTION);
+        // Verificar si la carrera está finalizada
+        if (carreraSeleccionada.isFinalizada()) {
+            int opcion = JOptionPane.showConfirmDialog(this,
+                    "⚠️ Esta carrera ya está finalizada.\n\n" +
+                            "🏁 Carrera: " + carreraSeleccionada.getNombre() + "\n" +
+                            "📅 Estado: Finalizada\n" +
+                            "📋 Participantes: " + carreraSeleccionada.getParticipaciones().size() + "\n\n" +
+                            "¿Está seguro que desea eliminar esta carrera finalizada?\n" +
+                            "Se perderán todos los resultados y participaciones.",
+                    "Confirmar eliminación de carrera finalizada",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
 
-        if (confirmacion == JOptionPane.YES_OPTION) {
-            gestor.getGrandesPremios().remove(carreraSeleccionada);
-            carreraSeleccionada = null;
+            if (opcion != JOptionPane.YES_OPTION) {
+                return;
+            }
+        } else {
+            // Para carreras no finalizadas
+            String mensaje = "¿Está seguro que desea eliminar esta carrera?\n\n" +
+                    "🏁 Carrera: " + carreraSeleccionada.getNombre() + "\n" +
+                    "🗺 Circuito: " + carreraSeleccionada.getCircuito().getNombre() + "\n" +
+                    "📅 Fecha: "
+                    + carreraSeleccionada.getFechaHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
-            actualizarTablaCarreras();
-            actualizarTablaParticipaciones();
-            limpiarFormularioPlanificacion();
+            if (!carreraSeleccionada.getParticipaciones().isEmpty()) {
+                mensaje += "\n\n⚠️ Se eliminarán " + carreraSeleccionada.getParticipaciones().size()
+                        + " inscripciones de pilotos.";
+            }
 
-            JOptionPane.showMessageDialog(this, "Carrera eliminada exitosamente", "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE);
+            int confirmacion = JOptionPane.showConfirmDialog(this,
+                    mensaje,
+                    "Confirmar eliminación",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (confirmacion != JOptionPane.YES_OPTION) {
+                return;
+            }
         }
+
+        // Proceder con la eliminación
+        String nombreCarrera = carreraSeleccionada.getNombre();
+        int numParticipaciones = carreraSeleccionada.getParticipaciones().size();
+
+        gestor.getGrandesPremios().remove(carreraSeleccionada);
+        carreraSeleccionada = null;
+
+        actualizarTablaCarreras();
+        actualizarTablaParticipaciones();
+        limpiarFormularioPlanificacion();
+
+        JOptionPane.showMessageDialog(this,
+                "✅ Carrera eliminada exitosamente\n\n" +
+                        "🗑️ " + nombreCarrera + "\n" +
+                        (numParticipaciones > 0 ? "📋 Se eliminaron " + numParticipaciones + " inscripciones"
+                                : "📝 Sin inscripciones"),
+                "Eliminación exitosa",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
@@ -586,13 +1164,19 @@ public class VentanaCarreras extends JFrame {
      */
     private void inscribirPiloto(JComboBox<Piloto> comboPilotos, JComboBox<Auto> comboAutos) {
         if (carreraSeleccionada == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione una carrera primero", "Advertencia",
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Debe seleccionar una carrera primero\n\n" +
+                            "📋 Vaya a la pestaña 'Planificar Carreras' y seleccione una carrera de la tabla",
+                    "Sin carrera seleccionada",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         if (carreraSeleccionada.isFinalizada()) {
-            JOptionPane.showMessageDialog(this, "No se puede inscribir pilotos en una carrera finalizada", "Error",
+            JOptionPane.showMessageDialog(this,
+                    "🏁 No se puede inscribir pilotos en una carrera finalizada\n\n" +
+                            "📊 Esta carrera ya tiene resultados registrados",
+                    "Carrera finalizada",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -601,8 +1185,40 @@ public class VentanaCarreras extends JFrame {
             Piloto piloto = (Piloto) comboPilotos.getSelectedItem();
             Auto auto = (Auto) comboAutos.getSelectedItem();
 
-            if (piloto == null || auto == null) {
-                JOptionPane.showMessageDialog(this, "Seleccione un piloto y un auto", "Advertencia",
+            if (piloto == null) {
+                JOptionPane.showMessageDialog(this,
+                        "⚠️ Debe seleccionar un piloto",
+                        "Piloto requerido",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (auto == null) {
+                JOptionPane.showMessageDialog(this,
+                        "⚠️ Debe seleccionar un auto",
+                        "Auto requerido",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Verificar si el piloto ya está inscrito
+            boolean yaInscrito = carreraSeleccionada.getParticipaciones().stream()
+                    .anyMatch(p -> p.getPiloto().equals(piloto));
+
+            if (yaInscrito) {
+                JOptionPane.showMessageDialog(this,
+                        "⚠️ El piloto " + piloto.getNombreCompleto() + " ya está inscrito en esta carrera",
+                        "Piloto ya inscrito",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Verificar límite de participantes
+            int participantesActuales = carreraSeleccionada.getParticipaciones().size();
+            if (participantesActuales >= 20) {
+                JOptionPane.showMessageDialog(this,
+                        "🚫 La carrera ha alcanzado el límite máximo de 20 participantes",
+                        "Carrera llena",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -612,11 +1228,19 @@ public class VentanaCarreras extends JFrame {
             actualizarTablaParticipaciones();
             actualizarTablaCarreras();
 
-            JOptionPane.showMessageDialog(this, "Piloto inscrito exitosamente", "Éxito",
+            JOptionPane.showMessageDialog(this,
+                    "✅ Piloto inscrito exitosamente\n\n" +
+                            "🏎️ " + piloto.getNombreCompleto() + "\n" +
+                            "🚗 " + auto.getModelo() + " (" + auto.getNumeroChasis() + ")\n" +
+                            "🏁 " + carreraSeleccionada.getNombre() + "\n" +
+                            "👥 Participantes: " + (participantesActuales + 1) + "/20",
+                    "Inscripción exitosa",
                     JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al inscribir piloto: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "❌ Error al inscribir piloto:\n" + e.getMessage(),
+                    "Error de inscripción",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -812,7 +1436,6 @@ public class VentanaCarreras extends JFrame {
                     participacion.setPosicionFinal(posicion);
                     participacion.setVueltaRapida(chkVueltaRapida.isSelected());
 
-                    // Actualizar puntos automáticamente usando el validador
                     controlador.ValidadorFormula1.actualizarPuntosParticipacion(participacion);
                 }
 
@@ -828,9 +1451,8 @@ public class VentanaCarreras extends JFrame {
                 }
 
                 actualizarTablaParticipaciones();
-                actualizarTablaCarreras(); // Actualizar también la tabla de carreras
+                actualizarTablaCarreras();
 
-                // Mostrar mensaje de confirmación con los puntos obtenidos
                 String mensaje = String.format("Resultado guardado exitosamente!\n\n" +
                         "Piloto: %s\n" +
                         "Posición: %s\n" +
@@ -907,14 +1529,12 @@ public class VentanaCarreras extends JFrame {
             }
         }
 
-        // Mostrar resumen antes de finalizar
         StringBuilder resumenPrevio = new StringBuilder();
         resumenPrevio.append("RESUMEN ANTES DE FINALIZAR\n");
         resumenPrevio.append("==========================\n\n");
         resumenPrevio.append("Carrera: ").append(carreraSeleccionada.getNombre()).append("\n");
         resumenPrevio.append("Participantes: ").append(carreraSeleccionada.getParticipaciones().size()).append("\n\n");
 
-        // Mostrar participantes con posiciones
         var participantesConPosicion = carreraSeleccionada.getParticipaciones().stream()
                 .filter(p -> p.getPosicionFinal() > 0)
                 .sorted((p1, p2) -> Integer.compare(p1.getPosicionFinal(), p2.getPosicionFinal()))
@@ -957,14 +1577,20 @@ public class VentanaCarreras extends JFrame {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                // Usar el método del gestor que valida y actualiza correctamente
+                // Validación adicional antes de finalizar
+                if (carreraSeleccionada == null) {
+                    throw new IllegalStateException("No hay carrera seleccionada para finalizar");
+                }
+
+                if (carreraSeleccionada.isFinalizada()) {
+                    throw new IllegalStateException("La carrera ya está finalizada");
+                }
+
                 gestor.finalizarCarrera(carreraSeleccionada);
 
-                // Actualizar tablas
                 actualizarTablaCarreras();
                 actualizarTablaParticipaciones();
 
-                // Mostrar resumen final de resultados
                 java.util.List<String> resultados = gestor.obtenerResumenResultados(carreraSeleccionada);
                 StringBuilder mensaje = new StringBuilder("🏁 ¡CARRERA FINALIZADA EXITOSAMENTE! 🏁\n\n");
                 mensaje.append("🏆 RESULTADOS OFICIALES:\n");
@@ -1038,7 +1664,6 @@ public class VentanaCarreras extends JFrame {
                         p.isVueltaRapida() ? " + VR" : ""));
             }
 
-            // Mostrar abandonos
             List<Participacion> abandonos = carreraSeleccionada.getParticipaciones().stream()
                     .filter(Participacion::isAbandono)
                     .toList();
@@ -1111,7 +1736,7 @@ public class VentanaCarreras extends JFrame {
     }
 
     /**
-     * Parsea fecha y hora del formulario
+     * Parsea fecha y hora del formulario y valida que sea en el futuro
      */
     private LocalDateTime parsearFechaHora() {
         try {
@@ -1121,9 +1746,22 @@ public class VentanaCarreras extends JFrame {
             String fechaStr = txtFecha.getText().trim();
             String horaStr = txtHora.getText().trim();
 
-            return LocalDateTime.of(
+            LocalDateTime fechaHora = LocalDateTime.of(
                     java.time.LocalDate.parse(fechaStr, formatoFecha),
                     java.time.LocalTime.parse(horaStr, formatoHora));
+
+            // Validar que la fecha y hora sea en el futuro
+            LocalDateTime ahora = LocalDateTime.now();
+            if (fechaHora.isBefore(ahora) || fechaHora.isEqual(ahora)) {
+                throw new IllegalArgumentException(
+                        "⚠️ La fecha y hora de la carrera debe ser posterior al momento actual.\n" +
+                                "Fecha actual: " + ahora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n"
+                                +
+                                "Fecha seleccionada: "
+                                + fechaHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            }
+
+            return fechaHora;
 
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
@@ -1139,7 +1777,6 @@ public class VentanaCarreras extends JFrame {
         boton.setPreferredSize(new Dimension(120, 40));
         boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
 
-        // Interfaz simple blanco y negro
         boton.setBackground(Color.WHITE);
         boton.setForeground(Color.BLACK);
         boton.setBorder(BorderFactory.createRaisedBevelBorder());
@@ -1176,18 +1813,15 @@ public class VentanaCarreras extends JFrame {
 
         if (respuesta == JOptionPane.YES_OPTION) {
             try {
-                // Convertir a lista y mezclar
                 java.util.List<Participacion> listaParticipaciones = new java.util.ArrayList<>(participaciones);
                 java.util.Collections.shuffle(listaParticipaciones);
 
-                // Asignar posiciones
                 for (int i = 0; i < listaParticipaciones.size(); i++) {
                     Participacion p = listaParticipaciones.get(i);
                     p.setPosicionFinal(i + 1);
                     controlador.ValidadorFormula1.actualizarPuntosParticipacion(p);
                 }
 
-                // Asignar vuelta rápida al ganador
                 if (!listaParticipaciones.isEmpty()) {
                     listaParticipaciones.get(0).setVueltaRapida(true);
                     controlador.ValidadorFormula1.actualizarPuntosParticipacion(listaParticipaciones.get(0));
@@ -1206,5 +1840,383 @@ public class VentanaCarreras extends JFrame {
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private void actualizarTablaPilotosDisponibles(DefaultTableModel modelo) {
+        modelo.setRowCount(0);
+
+        if (carreraSeleccionada == null) {
+            return;
+        }
+
+        java.util.Set<Piloto> pilotosInscritos = carreraSeleccionada.getParticipaciones()
+                .stream()
+                .map(Participacion::getPiloto)
+                .collect(java.util.stream.Collectors.toSet());
+
+        for (Piloto piloto : gestor.getPilotos()) {
+            if (!pilotosInscritos.contains(piloto)) {
+                Object[] fila = {
+                        piloto.getNombreCompleto(),
+                        piloto.getEscuderia() != null ? piloto.getEscuderia().getNombre() : "Sin escudería",
+                        piloto.getPuntosTotales() + " pts"
+                };
+                modelo.addRow(fila);
+            }
+        }
+    }
+
+    /**
+     * Inscribe los pilotos seleccionados en la tabla de pilotos disponibles
+     */
+    private void inscribirPilotosSeleccionados(JTable tablaPilotosDisponibles) {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera primero en la pestaña 'Planificar Carreras'",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int[] filasSeleccionadas = tablaPilotosDisponibles.getSelectedRows();
+        if (filasSeleccionadas.length == 0) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione al menos un piloto de la lista",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se pueden inscribir pilotos en una carrera finalizada",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int inscripcionesExitosas = 0;
+        int inscripcionesFallidas = 0;
+        StringBuilder errores = new StringBuilder();
+
+        for (int fila : filasSeleccionadas) {
+            try {
+                String nombrePiloto = (String) tablaPilotosDisponibles.getValueAt(fila, 0);
+                Piloto piloto = gestor.getPilotos().stream()
+                        .filter(p -> p.getNombreCompleto().equals(nombrePiloto))
+                        .findFirst()
+                        .orElse(null);
+
+                if (piloto != null) {
+                    Auto autoDisponible = buscarAutoDisponible();
+                    if (autoDisponible != null) {
+                        gestor.inscribirPilotoEnCarrera(piloto, autoDisponible, carreraSeleccionada);
+                        inscripcionesExitosas++;
+                    } else {
+                        errores.append("- ").append(nombrePiloto).append(": No hay autos disponibles\n");
+                        inscripcionesFallidas++;
+                    }
+                }
+            } catch (Exception e) {
+                String nombrePiloto = (String) tablaPilotosDisponibles.getValueAt(fila, 0);
+                errores.append("- ").append(nombrePiloto).append(": ").append(e.getMessage()).append("\n");
+                inscripcionesFallidas++;
+            }
+        }
+
+        // Actualizar interfaces
+        actualizarTablaParticipaciones();
+        actualizarTablaCarreras();
+
+        // Obtener el modelo de la tabla para actualizarlo
+        DefaultTableModel modelo = (DefaultTableModel) tablaPilotosDisponibles.getModel();
+        actualizarTablaPilotosDisponibles(modelo);
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append("📊 Resultado de la inscripción masiva:\n\n");
+        mensaje.append("✅ Inscripciones exitosas: ").append(inscripcionesExitosas).append("\n");
+        mensaje.append("❌ Inscripciones fallidas: ").append(inscripcionesFallidas).append("\n");
+
+        if (errores.length() > 0) {
+            mensaje.append("\n🔍 Detalles de errores:\n").append(errores.toString());
+        }
+
+        JOptionPane.showMessageDialog(this, mensaje.toString(),
+                "Resultado de Inscripción", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Selecciona automáticamente 10 pilotos e inscribe en la carrera
+     */
+    private void seleccionarYInscribirAutomaticamente(JTable tablaPilotosDisponibles) {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera primero en la pestaña 'Planificar Carreras'",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se pueden inscribir pilotos en una carrera finalizada",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Verificar cuántos espacios disponibles hay
+        int participantesActuales = carreraSeleccionada.getParticipaciones().size();
+        int espaciosDisponibles = 20 - participantesActuales;
+
+        if (espaciosDisponibles <= 0) {
+            JOptionPane.showMessageDialog(this,
+                    "🚫 La carrera ya está llena (20/20 participantes)",
+                    "Carrera llena", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Determinar cuántos pilotos seleccionar (máximo 10, pero sin exceder espacios
+        // disponibles)
+        int pilotosASeleccionar = Math.min(10, espaciosDisponibles);
+        int pilotosDisponibles = tablaPilotosDisponibles.getRowCount();
+
+        if (pilotosDisponibles == 0) {
+            JOptionPane.showMessageDialog(this,
+                    "ℹ️ No hay pilotos disponibles para inscribir",
+                    "Sin pilotos", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        pilotosASeleccionar = Math.min(pilotosASeleccionar, pilotosDisponibles);
+
+        int confirmacion = JOptionPane.showConfirmDialog(this,
+                String.format("🎯 Selección automática:\n\n" +
+                        "Se seleccionarán automáticamente %d pilotos para inscribir en la carrera.\n" +
+                        "Espacios disponibles: %d/20\n" +
+                        "Pilotos disponibles: %d\n\n" +
+                        "¿Continuar con la selección automática?",
+                        pilotosASeleccionar, espaciosDisponibles, pilotosDisponibles),
+                "Confirmar Selección Automática",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (confirmacion != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        // Seleccionar las primeras N filas automáticamente
+        tablaPilotosDisponibles.clearSelection();
+        for (int i = 0; i < pilotosASeleccionar; i++) {
+            tablaPilotosDisponibles.addRowSelectionInterval(i, i);
+        }
+
+        // Proceder con la inscripción
+        inscribirPilotosSeleccionados(tablaPilotosDisponibles);
+    }
+
+    /**
+     * Inscribe todos los pilotos disponibles automáticamente
+     */
+    private void inscribirTodosLosPilotos() {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera primero en la pestaña 'Planificar Carreras'",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se pueden inscribir pilotos en una carrera finalizada",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        java.util.Set<Piloto> pilotosInscritos = carreraSeleccionada.getParticipaciones()
+                .stream()
+                .map(Participacion::getPiloto)
+                .collect(java.util.stream.Collectors.toSet());
+
+        java.util.List<Piloto> pilotosDisponibles = gestor.getPilotos().stream()
+                .filter(p -> !pilotosInscritos.contains(p))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (pilotosDisponibles.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "ℹ️ Todos los pilotos disponibles ya están inscritos en esta carrera",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this,
+                String.format(
+                        "¿Está seguro que desea inscribir todos los pilotos disponibles (%d pilotos) en esta carrera?\n\n"
+                                +
+                                "Se asignarán autos automáticamente.",
+                        pilotosDisponibles.size()),
+                "Confirmar Inscripción Masiva",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (confirmacion != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        int inscripcionesExitosas = 0;
+        int inscripcionesFallidas = 0;
+        StringBuilder errores = new StringBuilder();
+
+        for (Piloto piloto : pilotosDisponibles) {
+            try {
+                Auto autoDisponible = buscarAutoDisponible();
+                if (autoDisponible != null) {
+                    gestor.inscribirPilotoEnCarrera(piloto, autoDisponible, carreraSeleccionada);
+                    inscripcionesExitosas++;
+                } else {
+                    errores.append("- ").append(piloto.getNombreCompleto()).append(": No hay autos disponibles\n");
+                    inscripcionesFallidas++;
+                }
+            } catch (Exception e) {
+                errores.append("- ").append(piloto.getNombreCompleto()).append(": ").append(e.getMessage())
+                        .append("\n");
+                inscripcionesFallidas++;
+            }
+        }
+
+        actualizarTablaParticipaciones();
+        actualizarTablaCarreras();
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append("🏁 Inscripción masiva completada:\n\n");
+        mensaje.append("✅ Pilotos inscritos: ").append(inscripcionesExitosas).append("\n");
+        mensaje.append("❌ Fallos en inscripción: ").append(inscripcionesFallidas).append("\n");
+
+        if (errores.length() > 0) {
+            mensaje.append("\n🔍 Detalles de errores:\n").append(errores.toString());
+        }
+
+        JOptionPane.showMessageDialog(this, mensaje.toString(),
+                "Inscripción Masiva Completada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Busca un auto disponible para asignación automática
+     */
+    private Auto buscarAutoDisponible() {
+        if (carreraSeleccionada == null) {
+            return null;
+        }
+
+        java.util.Set<Auto> autosAsignados = carreraSeleccionada.getParticipaciones()
+                .stream()
+                .map(Participacion::getAuto)
+                .collect(java.util.stream.Collectors.toSet());
+
+        return gestor.getAutos().stream()
+                .filter(auto -> !autosAsignados.contains(auto))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Remueve todas las participaciones de la carrera
+     */
+    private void removerTodasLasParticipaciones() {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera primero",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se puede modificar una carrera finalizada",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.getParticipaciones().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "ℹ️ No hay participaciones para remover",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(this,
+                String.format(
+                        "¿Está seguro que desea remover TODAS las inscripciones (%d participantes) de esta carrera?\n\n"
+                                +
+                                "Esta acción no se puede deshacer.",
+                        carreraSeleccionada.getParticipaciones().size()),
+                "Confirmar Eliminación Total",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            int participantesRemovidos = carreraSeleccionada.getParticipaciones().size();
+            carreraSeleccionada.getParticipaciones().clear();
+
+            actualizarTablaParticipaciones();
+            actualizarTablaCarreras();
+
+            JOptionPane.showMessageDialog(this,
+                    String.format("✅ Se removieron %d participaciones exitosamente", participantesRemovidos),
+                    "Participaciones Removidas", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    /**
+     * Asigna autos automáticamente a pilotos que no tienen auto asignado
+     */
+    private void asignarAutosAutomaticamente() {
+        if (carreraSeleccionada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "⚠️ Seleccione una carrera primero",
+                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (carreraSeleccionada.isFinalizada()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ No se puede modificar una carrera finalizada",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        java.util.List<Participacion> participacionesSinAuto = carreraSeleccionada.getParticipaciones()
+                .stream()
+                .filter(p -> p.getAuto() == null)
+                .collect(java.util.stream.Collectors.toList());
+
+        if (participacionesSinAuto.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "ℹ️ Todas las participaciones ya tienen autos asignados",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int asignacionesExitosas = 0;
+        int asignacionesFallidas = 0;
+        StringBuilder errores = new StringBuilder();
+
+        for (Participacion participacion : participacionesSinAuto) {
+            Auto autoDisponible = buscarAutoDisponible();
+            if (autoDisponible != null) {
+                participacion.setAuto(autoDisponible);
+                asignacionesExitosas++;
+            } else {
+                errores.append("- ").append(participacion.getPiloto().getNombreCompleto())
+                        .append(": No hay autos disponibles\n");
+                asignacionesFallidas++;
+            }
+        }
+
+        actualizarTablaParticipaciones();
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append("🔧 Asignación automática de autos completada:\n\n");
+        mensaje.append("✅ Asignaciones exitosas: ").append(asignacionesExitosas).append("\n");
+        mensaje.append("❌ Asignaciones fallidas: ").append(asignacionesFallidas).append("\n");
+
+        if (errores.length() > 0) {
+            mensaje.append("\n🔍 Detalles de errores:\n").append(errores.toString());
+        }
+
+        JOptionPane.showMessageDialog(this, mensaje.toString(),
+                "Asignación Automática Completada", JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -16,7 +16,7 @@ public class VentanaPilotos extends JFrame {
     private GestorFormula1 gestor;
     private JTable tablaPilotos;
     private DefaultTableModel modeloTabla;
-    private JTextField txtNombre, txtApellido, txtEdad, txtNacionalidad, txtNumero, txtExperiencia;
+    private JTextField txtDNI, txtNombre, txtApellido, txtEdad, txtNacionalidad, txtNumero, txtExperiencia;
     private JLabel lblImagenPiloto, lblEstadisticas;
     private Piloto pilotoSeleccionado;
     private JButton btnAgregar, btnModificar, btnEliminar, btnLimpiar;
@@ -80,6 +80,7 @@ public class VentanaPilotos extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
 
         // Configurar campos de entrada
+        txtDNI = crearCampoTexto();
         txtNombre = crearCampoTexto();
         txtApellido = crearCampoTexto();
         txtEdad = crearCampoTexto();
@@ -92,12 +93,13 @@ public class VentanaPilotos extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        agregarCampo(panelCampos, "Nombre:", txtNombre, 0, gbc);
-        agregarCampo(panelCampos, "Apellido:", txtApellido, 1, gbc);
-        agregarCampo(panelCampos, "Edad:", txtEdad, 2, gbc);
-        agregarCampo(panelCampos, "Nacionalidad:", txtNacionalidad, 3, gbc);
-        agregarCampo(panelCampos, "Número:", txtNumero, 4, gbc);
-        agregarCampo(panelCampos, "Años Exp.:", txtExperiencia, 5, gbc);
+        agregarCampo(panelCampos, "DNI:", txtDNI, 0, gbc);
+        agregarCampo(panelCampos, "Nombre:", txtNombre, 1, gbc);
+        agregarCampo(panelCampos, "Apellido:", txtApellido, 2, gbc);
+        agregarCampo(panelCampos, "Edad:", txtEdad, 3, gbc);
+        agregarCampo(panelCampos, "Nacionalidad:", txtNacionalidad, 4, gbc);
+        agregarCampo(panelCampos, "Número:", txtNumero, 5, gbc);
+        agregarCampo(panelCampos, "Años Exp.:", txtExperiencia, 6, gbc);
 
         // Panel de botones del formulario
         JPanel panelBotonesForm = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
@@ -199,14 +201,26 @@ public class VentanaPilotos extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
         // Título de la sección
-        JLabel titulo = new JLabel("LISTA DE PILOTOS REGISTRADOS");
+        JLabel titulo = new JLabel("🏁 LISTA DE PILOTOS REGISTRADOS");
         titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titulo.setForeground(new Color(52, 58, 64));
-        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        // Leyenda de colores
+        JLabel leyenda = new JLabel("<html><small style='color: #6c757d;'>" +
+                "🟢 Contratado | 🟡 Contrato Expirado | 🔴 Piloto Libre" +
+                "</small></html>");
+        leyenda.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        leyenda.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+
+        JPanel panelTitulo = new JPanel(new BorderLayout());
+        panelTitulo.setBackground(new Color(248, 249, 250));
+        panelTitulo.add(titulo, BorderLayout.NORTH);
+        panelTitulo.add(leyenda, BorderLayout.SOUTH);
 
         // Configurar tabla
-        String[] columnas = { "#", "Nombre Completo", "Edad", "Nacionalidad", "Número", "Puntos",
-                "Experiencia" };
+        String[] columnas = { "Número", "DNI", "Nombre Completo", "Edad", "Nacionalidad", "Escudería", "Estado",
+                "Experiencia", "Puntos" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -221,7 +235,7 @@ public class VentanaPilotos extends JFrame {
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         scrollPane.getViewport().setBackground(Color.WHITE);
 
-        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(panelTitulo, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
@@ -251,13 +265,26 @@ public class VentanaPilotos extends JFrame {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (!isSelected) {
+                    // Color de fondo alternado
                     if (row % 2 == 0) {
                         c.setBackground(Color.WHITE);
                     } else {
                         c.setBackground(new Color(248, 249, 250));
                     }
-                }
 
+                    // Color según el estado del piloto (columna 6)
+                    String estado = (String) table.getValueAt(row, 6);
+                    if (estado.contains("🟢")) {
+                        // Verde claro para pilotos contratados
+                        c.setBackground(new Color(212, 237, 218));
+                    } else if (estado.contains("🔴")) {
+                        // Amarillo claro para pilotos libres
+                        c.setBackground(new Color(255, 243, 205));
+                    } else if (estado.contains("🟡")) {
+                        // Rosa claro para contratos expirados
+                        c.setBackground(new Color(248, 215, 218));
+                    }
+                }
                 return c;
             }
         });
@@ -292,9 +319,12 @@ public class VentanaPilotos extends JFrame {
         lblImagenPiloto.setForeground(new Color(108, 117, 125));
 
         // Panel de estadísticas
-        lblEstadisticas = new JLabel("<html><center>Selecciona un piloto<br>para ver sus estadísticas</center></html>");
-        lblEstadisticas.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblEstadisticas.setForeground(new Color(108, 117, 125));
+        lblEstadisticas = new JLabel("<html><div style='text-align: center; font-family: Segoe UI;'>" +
+                "<h3 style='color: #6c757d; margin: 10px 0;'>📊 INFORMACIÓN</h3>" +
+                "<p style='color: #6c757d; margin: 5px 0;'>Selecciona un piloto de la tabla</p>" +
+                "<p style='color: #6c757d; margin: 5px 0;'>para ver sus estadísticas</p>" +
+                "<p style='color: #6c757d; margin: 5px 0;'>y datos completos</p>" +
+                "</div></html>");
         lblEstadisticas.setHorizontalAlignment(JLabel.CENTER);
 
         panel.add(titulo, BorderLayout.NORTH);
@@ -377,14 +407,37 @@ public class VentanaPilotos extends JFrame {
     private void actualizarTabla() {
         modeloTabla.setRowCount(0);
         for (Piloto piloto : gestor.getPilotos()) {
+            // Buscar escudería actual del piloto
+            String escuderiaActual = "Sin contrato";
+            String estado = "🔴 Libre";
+
+            // Buscar en los contratos activos
+            if (piloto.getEscuderia() != null) {
+                escuderiaActual = piloto.getEscuderia().getNombre();
+                estado = "🟢 Contratado";
+
+                // Verificar si el contrato está vigente
+                try {
+                    var relacionesActivas = gestor.getRelacionesActivasPiloto(piloto);
+                    if (relacionesActivas.isEmpty()) {
+                        estado = "🟡 Contrato expirado";
+                        escuderiaActual = "Contrato expirado";
+                    }
+                } catch (Exception e) {
+                    // Si hay error, mantener el estado básico
+                }
+            }
+
             Object[] fila = {
-                    piloto.getNumero(),
-                    piloto.getNombreCompleto(),
-                    piloto.getEdad(),
-                    piloto.getNacionalidad(),
-                    piloto.getNumero(),
-                    piloto.getPuntosTotales(),
-                    piloto.getExperiencia()
+                    "🏁 " + piloto.getNumero(),
+                    piloto.getDni(),
+                    "👤 " + piloto.getNombre() + " " + piloto.getApellido(),
+                    piloto.getEdad() + " años",
+                    "🌍 " + piloto.getNacionalidad(),
+                    "🏢 " + escuderiaActual,
+                    estado,
+                    "⏱️ " + piloto.getExperiencia() + " años",
+                    "🏆 " + piloto.getPuntosTotales() + " pts"
             };
             modeloTabla.addRow(fila);
         }
@@ -397,14 +450,15 @@ public class VentanaPilotos extends JFrame {
         try {
             validarCampos();
 
+            String dni = txtDNI.getText().trim();
             String nombre = txtNombre.getText().trim();
             String apellido = txtApellido.getText().trim();
-            int edad = Integer.parseInt(txtEdad.getText().trim());
+            int edad = Integer.parseInt(txtEdad.getText());
             String nacionalidad = txtNacionalidad.getText().trim();
-            int numero = Integer.parseInt(txtNumero.getText().trim());
-            int experiencia = Integer.parseInt(txtExperiencia.getText().trim());
+            int numero = Integer.parseInt(txtNumero.getText());
+            int experiencia = Integer.parseInt(txtExperiencia.getText());
 
-            Piloto nuevoPiloto = new Piloto(nombre, apellido, edad, nacionalidad, numero, experiencia);
+            Piloto nuevoPiloto = new Piloto(dni, nombre, apellido, edad, nacionalidad, numero, experiencia);
             gestor.registrarPiloto(nuevoPiloto);
 
             actualizarTabla();
@@ -438,6 +492,7 @@ public class VentanaPilotos extends JFrame {
         try {
             validarCampos();
 
+            pilotoSeleccionado.setDni(txtDNI.getText().trim());
             pilotoSeleccionado.setNombre(txtNombre.getText().trim());
             pilotoSeleccionado.setApellido(txtApellido.getText().trim());
             pilotoSeleccionado.setEdad(Integer.parseInt(txtEdad.getText().trim()));
@@ -505,9 +560,9 @@ public class VentanaPilotos extends JFrame {
     private void seleccionarPiloto() {
         int filaSeleccionada = tablaPilotos.getSelectedRow();
         if (filaSeleccionada >= 0) {
-            String nombrePiloto = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
+            String dni = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
             pilotoSeleccionado = gestor.getPilotos().stream()
-                    .filter(p -> p.getNombreCompleto().equals(nombrePiloto))
+                    .filter(p -> p.getDni().equals(dni))
                     .findFirst().orElse(null);
 
             if (pilotoSeleccionado != null) {
@@ -521,6 +576,7 @@ public class VentanaPilotos extends JFrame {
      * Carga los datos del piloto en el formulario
      */
     private void cargarDatosPiloto(Piloto piloto) {
+        txtDNI.setText(piloto.getDni());
         txtNombre.setText(piloto.getNombre());
         txtApellido.setText(piloto.getApellido());
         txtEdad.setText(String.valueOf(piloto.getEdad()));
@@ -533,12 +589,70 @@ public class VentanaPilotos extends JFrame {
      * Muestra las estadísticas del piloto seleccionado
      */
     private void mostrarEstadisticasPiloto(Piloto piloto) {
-        StringBuilder stats = new StringBuilder("<html><div style='text-align: center;'>");
-        stats.append("<b>").append(piloto.getNombreCompleto()).append("</b><br>");
-        stats.append("Número: #").append(piloto.getNumero()).append("<br>");
-        stats.append("Puntos: ").append(piloto.getPuntosTotales()).append("<br>");
-        stats.append("Experiencia: ").append(piloto.getExperiencia()).append(" años<br>");
-        stats.append("Nacionalidad: ").append(piloto.getNacionalidad()).append("<br>");
+        StringBuilder stats = new StringBuilder("<html><div style='padding: 10px;'>");
+
+        // Información básica
+        stats.append("<div style='text-align: center; margin-bottom: 15px;'>");
+        stats.append("<b style='font-size: 16px; color: #2c3e50;'>").append(piloto.getNombre()).append(" ")
+                .append(piloto.getApellido()).append("</b><br>");
+        stats.append("<span style='color: #7f8c8d;'>#").append(piloto.getNumero()).append(" • ")
+                .append(piloto.getNacionalidad()).append("</span>");
+        stats.append("</div>");
+
+        // Datos personales
+        stats.append("<div style='margin-bottom: 15px;'>");
+        stats.append("<b style='color: #34495e;'>DATOS PERSONALES</b><hr style='margin: 5px 0;'>");
+        stats.append("<b>DNI:</b> ").append(piloto.getDni()).append("<br>");
+        stats.append("<b>Edad:</b> ").append(piloto.getEdad()).append(" años<br>");
+        stats.append("<b>Experiencia:</b> ").append(piloto.getExperiencia()).append(" años<br>");
+        stats.append("</div>");
+
+        // Información de escudería y contrato
+        stats.append("<div style='margin-bottom: 15px;'>");
+        stats.append("<b style='color: #34495e;'>CONTRATO ACTUAL</b><hr style='margin: 5px 0;'>");
+        if (piloto.getEscuderia() != null) {
+            stats.append("<b>Escudería:</b> ").append(piloto.getEscuderia().getNombre()).append("<br>");
+
+            // Obtener información del contrato
+            try {
+                var relacionesActivas = gestor.getRelacionesActivasPiloto(piloto);
+                if (!relacionesActivas.isEmpty()) {
+                    var contrato = relacionesActivas.get(0);
+                    stats.append("<b>Desde:</b> ").append(contrato.getDesdeFecha()).append("<br>");
+                    if (contrato.getHastaFecha() != null) {
+                        stats.append("<b>Hasta:</b> ").append(contrato.getHastaFecha()).append("<br>");
+                        stats.append("<b>Estado:</b> ").append(contrato.estaVigente() ? "VIGENTE" : "EXPIRADO")
+                                .append("<br>");
+                    } else {
+                        stats.append("<b>Duración:</b> Contrato indefinido<br>");
+                        stats.append("<b>Estado:</b> ACTIVO<br>");
+                    }
+                } else {
+                    stats.append("<span style='color: #e74c3c;'>Contrato expirado</span><br>");
+                }
+            } catch (Exception e) {
+                stats.append("Error al obtener contrato<br>");
+            }
+        } else {
+            stats.append("<span style='color: #e74c3c;'><b>SIN ESCUDERÍA</b></span><br>");
+            stats.append("<span style='color: #7f8c8d;'>Piloto libre</span><br>");
+        }
+        stats.append("</div>");
+
+        // Estadísticas de rendimiento
+        stats.append("<div>");
+        stats.append("<b style='color: #34495e;'>RENDIMIENTO</b><hr style='margin: 5px 0;'>");
+        stats.append("<b>Puntos totales:</b> ").append(piloto.getPuntosTotales()).append("<br>");
+
+        // Calcular carreras participadas (simplificado)
+        int carrerasParticipadas = piloto.getPuntosTotales() > 0 ? (piloto.getPuntosTotales() / 5) + 3 : 0; // Estimación
+        stats.append("<b>Carreras:</b> ~").append(carrerasParticipadas).append("<br>");
+
+        if (carrerasParticipadas > 0) {
+            double promedio = (double) piloto.getPuntosTotales() / carrerasParticipadas;
+            stats.append("<b>Promedio:</b> ").append(String.format("%.1f", promedio)).append(" pts/carrera<br>");
+        }
+        stats.append("</div>");
 
         stats.append("</div></html>");
         lblEstadisticas.setText(stats.toString());
@@ -548,6 +662,7 @@ public class VentanaPilotos extends JFrame {
      * Limpia el formulario
      */
     private void limpiarFormulario() {
+        txtDNI.setText("");
         txtNombre.setText("");
         txtApellido.setText("");
         txtEdad.setText("");
@@ -564,7 +679,8 @@ public class VentanaPilotos extends JFrame {
      * Valida los campos del formulario
      */
     private void validarCampos() {
-        if (txtNombre.getText().trim().isEmpty() ||
+        if (txtDNI.getText().trim().isEmpty() ||
+                txtNombre.getText().trim().isEmpty() ||
                 txtApellido.getText().trim().isEmpty() ||
                 txtEdad.getText().trim().isEmpty() ||
                 txtNacionalidad.getText().trim().isEmpty() ||

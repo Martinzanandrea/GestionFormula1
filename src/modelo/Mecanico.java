@@ -15,11 +15,7 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  */
-public class Mecanico {
-    /** Nombre del mecánico */
-    private String nombre;
-    /** Apellido del mecánico */
-    private String apellido;
+public class Mecanico extends Persona {
     /** Años de experiencia en F1 */
     private int experiencia;
     /** Lista de especialidades técnicas del mecánico */
@@ -32,14 +28,20 @@ public class Mecanico {
      * La lista de especialidades se inicializa vacía.
      * </p>
      * 
+     * @param dni         Documento Nacional de Identidad (no puede ser null o
+     *                    vacío)
      * @param nombre      Nombre del mecánico (no puede ser null o vacío)
      * @param apellido    Apellido del mecánico (no puede ser null o vacío)
      * @param experiencia Años de experiencia (debe ser no negativo)
      * @throws IllegalArgumentException si algún parámetro no es válido
      */
-    public Mecanico(String nombre, String apellido, int experiencia) {
-        this.nombre = nombre;
-        this.apellido = apellido;
+    public Mecanico(String dni, String nombre, String apellido, int experiencia) {
+        super(dni, nombre, apellido);
+
+        if (experiencia < 0) {
+            throw new IllegalArgumentException("La experiencia no puede ser negativa");
+        }
+
         this.experiencia = experiencia;
         this.especialidades = new ArrayList<>();
     }
@@ -71,22 +73,6 @@ public class Mecanico {
     }
 
     // Getters y Setters
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
     public int getExperiencia() {
         return experiencia;
     }
@@ -97,15 +83,6 @@ public class Mecanico {
 
     public List<Especialidad> getEspecialidades() {
         return new ArrayList<>(especialidades);
-    }
-
-    /**
-     * Obtiene el nombre completo del mecánico
-     * 
-     * @return Nombre completo
-     */
-    public String getNombreCompleto() {
-        return nombre + " " + apellido;
     }
 
     /**
@@ -122,7 +99,7 @@ public class Mecanico {
 
     @Override
     public String toString() {
-        return getNombreCompleto() + " - " + experiencia + " años - " + getEspecialidadesString();
+        return getNombre() + " " + getApellido() + " - " + experiencia + " años - " + getEspecialidadesString();
     }
 
     @Override
@@ -131,12 +108,11 @@ public class Mecanico {
             return true;
         if (obj == null || getClass() != obj.getClass())
             return false;
-        Mecanico mecanico = (Mecanico) obj;
-        return nombre.equals(mecanico.nombre) && apellido.equals(mecanico.apellido);
+        return super.equals(obj); // Usa la comparación por DNI de Persona
     }
 
     @Override
     public int hashCode() {
-        return (nombre + apellido).hashCode();
+        return super.hashCode(); // Usa el hash del DNI de Persona
     }
 }

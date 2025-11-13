@@ -5,20 +5,24 @@ import modelo.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Ventana para la gestión de autos
+ * Ventana para la gestión de autos de Fórmula 1
+ * Permite crear, asignar y desasignar autos de escuderías
  */
 public class VentanaAutos extends JFrame {
     private GestorFormula1 gestor;
     private JTable tablaAutos;
     private DefaultTableModel modeloTabla;
     private JTextField txtModelo, txtChasis, txtMotor, txtAño, txtNumeroChasis, txtPeso, txtPotencia;
+    private JComboBox<String> cmbEscuderia;
+    private JButton btnCrearAuto, btnAsignarAuto, btnDesasignarAuto, btnLimpiar, btnCerrar;
+    private Auto autoSeleccionado;
 
     /**
      * Constructor de la ventana de autos
-     * 
-     * @param gestor Gestor principal del sistema
      */
     public VentanaAutos(GestorFormula1 gestor) {
         this.gestor = gestor;
@@ -35,6 +39,7 @@ public class VentanaAutos extends JFrame {
 
         // Panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Panel de formulario
         JPanel panelFormulario = crearPanelFormulario();
@@ -53,31 +58,34 @@ public class VentanaAutos extends JFrame {
     }
 
     /**
-     * Crea el panel de formulario para agregar/editar autos
+     * Crea el panel de formulario
      */
     private JPanel crearPanelFormulario() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Datos del Auto"));
-
+        panel.setBorder(BorderFactory.createTitledBorder("Gestión de Autos"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Inicializar campos
+        txtModelo = new JTextField(15);
+        txtChasis = new JTextField(15);
+        txtMotor = new JTextField(15);
+        txtAño = new JTextField(15);
+        txtNumeroChasis = new JTextField(15);
+        txtPeso = new JTextField(15);
+        txtPotencia = new JTextField(15);
+        cmbEscuderia = new JComboBox<>();
 
         // Primera fila
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(new JLabel("Modelo:"), gbc);
         gbc.gridx = 1;
-        txtModelo = new JTextField();
-        txtModelo.setPreferredSize(new Dimension(200, 35));
-        txtModelo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtModelo, gbc);
-
         gbc.gridx = 2;
         panel.add(new JLabel("Chasis:"), gbc);
         gbc.gridx = 3;
-        txtChasis = new JTextField();
-        txtChasis.setPreferredSize(new Dimension(200, 35));
-        txtChasis.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtChasis, gbc);
 
         // Segunda fila
@@ -85,35 +93,21 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 1;
         panel.add(new JLabel("Motor:"), gbc);
         gbc.gridx = 1;
-        txtMotor = new JTextField();
-        txtMotor.setPreferredSize(new Dimension(200, 35));
-        txtMotor.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtMotor, gbc);
-
         gbc.gridx = 2;
         panel.add(new JLabel("Año:"), gbc);
         gbc.gridx = 3;
-        txtAño = new JTextField();
-        txtAño.setPreferredSize(new Dimension(200, 35));
-        txtAño.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtAño, gbc);
 
         // Tercera fila
         gbc.gridx = 0;
         gbc.gridy = 2;
-        panel.add(new JLabel("Número de Chasis:"), gbc);
+        panel.add(new JLabel("Número Chasis:"), gbc);
         gbc.gridx = 1;
-        txtNumeroChasis = new JTextField();
-        txtNumeroChasis.setPreferredSize(new Dimension(200, 35));
-        txtNumeroChasis.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtNumeroChasis, gbc);
-
         gbc.gridx = 2;
         panel.add(new JLabel("Peso (kg):"), gbc);
         gbc.gridx = 3;
-        txtPeso = new JTextField();
-        txtPeso.setPreferredSize(new Dimension(200, 35));
-        txtPeso.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtPeso, gbc);
 
         // Cuarta fila
@@ -121,24 +115,25 @@ public class VentanaAutos extends JFrame {
         gbc.gridy = 3;
         panel.add(new JLabel("Potencia (HP):"), gbc);
         gbc.gridx = 1;
-        txtPotencia = new JTextField();
-        txtPotencia.setPreferredSize(new Dimension(200, 35));
-        txtPotencia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         panel.add(txtPotencia, gbc);
+        gbc.gridx = 2;
+        panel.add(new JLabel("Escudería:"), gbc);
+        gbc.gridx = 3;
+        panel.add(cmbEscuderia, gbc);
 
         return panel;
     }
 
     /**
-     * Crea el panel de tabla para mostrar los autos
+     * Crea el panel de tabla
      */
     private JPanel crearPanelTabla() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Lista de Autos"));
+        panel.setBorder(BorderFactory.createTitledBorder("Autos Registrados"));
 
         // Crear modelo de tabla
-        String[] columnas = { "Modelo", "Chasis", "Motor", "Año", "Nº Chasis", "Peso (kg)", "Potencia (HP)",
-                "Escudería" };
+        String[] columnas = { "Modelo", "Chasis", "Motor", "Año", "Número Chasis", "Peso", "Potencia", "Escudería",
+                "Estado" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -148,8 +143,6 @@ public class VentanaAutos extends JFrame {
 
         tablaAutos = new JTable(modeloTabla);
         tablaAutos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // Agregar listener para selección
         tablaAutos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 cargarAutoSeleccionado();
@@ -157,9 +150,9 @@ public class VentanaAutos extends JFrame {
         });
 
         JScrollPane scrollPane = new JScrollPane(tablaAutos);
-        scrollPane.setPreferredSize(new Dimension(900, 350));
-
+        scrollPane.setPreferredSize(new Dimension(800, 250));
         panel.add(scrollPane, BorderLayout.CENTER);
+
         return panel;
     }
 
@@ -167,31 +160,24 @@ public class VentanaAutos extends JFrame {
      * Crea el panel de botones
      */
     private JPanel crearPanelBotones() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JPanel panel = new JPanel(new FlowLayout());
 
-        JButton btnAgregar = new JButton("Agregar");
-        JButton btnModificar = new JButton("Modificar");
-        JButton btnEliminar = new JButton("Eliminar");
-        JButton btnLimpiar = new JButton("Limpiar");
-        JButton btnCerrar = new JButton("Cerrar");
+        btnCrearAuto = new JButton("Crear Auto Libre");
+        btnAsignarAuto = new JButton("Asignar a Escudería");
+        btnDesasignarAuto = new JButton("Desasignar de Escudería");
+        btnLimpiar = new JButton("Limpiar");
+        btnCerrar = new JButton("Cerrar");
 
-        // Aplicar estilos modernos a los botones
-        aplicarEstiloBoton(btnAgregar);
-        aplicarEstiloBoton(btnModificar);
-        aplicarEstiloBoton(btnEliminar);
-        aplicarEstiloBoton(btnLimpiar);
-        aplicarEstiloBoton(btnCerrar);
-
-        // Agregar listeners
-        btnAgregar.addActionListener(e -> agregarAuto());
-        btnModificar.addActionListener(e -> modificarAuto());
-        btnEliminar.addActionListener(e -> eliminarAuto());
+        // Configurar acciones
+        btnCrearAuto.addActionListener(e -> crearAutoLibre());
+        btnAsignarAuto.addActionListener(e -> asignarAutoAEscuderia());
+        btnDesasignarAuto.addActionListener(e -> desasignarAutoDeEscuderia());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
         btnCerrar.addActionListener(e -> dispose());
 
-        panel.add(btnAgregar);
-        panel.add(btnModificar);
-        panel.add(btnEliminar);
+        panel.add(btnCrearAuto);
+        panel.add(btnAsignarAuto);
+        panel.add(btnDesasignarAuto);
         panel.add(btnLimpiar);
         panel.add(btnCerrar);
 
@@ -199,20 +185,35 @@ public class VentanaAutos extends JFrame {
     }
 
     /**
-     * Configura la ventana
+     * Configura las propiedades de la ventana
      */
     private void configurarVentana() {
         setTitle("Gestión de Autos");
-        setSize(1000, 650);
-        setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setResizable(true);
+        pack();
+        setLocationRelativeTo(null);
     }
 
     /**
      * Carga los datos iniciales
      */
     private void cargarDatos() {
+        cargarEscuderias();
         actualizarTablaAutos();
+    }
+
+    /**
+     * Carga las escuderías en el combo box
+     */
+    private void cargarEscuderias() {
+        cmbEscuderia.removeAllItems();
+        cmbEscuderia.addItem("Sin asignar");
+
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            cmbEscuderia.addItem(escuderia.getNombre());
+        }
     }
 
     /**
@@ -220,12 +221,16 @@ public class VentanaAutos extends JFrame {
      */
     private void actualizarTablaAutos() {
         modeloTabla.setRowCount(0);
-        for (Auto auto : gestor.getAutos()) {
-            // Buscar escudería del auto
-            String escuderia = "Sin escudería";
-            for (Escuderia e : gestor.getEscuderias()) {
-                if (e.getAutos().contains(auto)) {
-                    escuderia = e.getNombre();
+        List<Auto> autos = gestor.getAutos();
+        List<Escuderia> escuderias = gestor.getEscuderias();
+
+        for (Auto auto : autos) {
+            String escuderiaAsignada = "Libre";
+
+            // Buscar si el auto está asignado a alguna escudería
+            for (Escuderia escuderia : escuderias) {
+                if (escuderia.getAutos().contains(auto)) {
+                    escuderiaAsignada = escuderia.getNombre();
                     break;
                 }
             }
@@ -236,43 +241,51 @@ public class VentanaAutos extends JFrame {
                     auto.getMotor(),
                     auto.getAño(),
                     auto.getNumeroChasis(),
-                    auto.getPeso(),
-                    auto.getPotencia(),
-                    escuderia
+                    auto.getPeso() + " kg",
+                    auto.getPotencia() + " HP",
+                    escuderiaAsignada,
+                    escuderiaAsignada.equals("Libre") ? "Disponible" : "Asignado"
             };
             modeloTabla.addRow(fila);
         }
     }
 
     /**
-     * Carga los datos del auto seleccionado en el formulario
+     * Carga el auto seleccionado en el formulario
      */
     private void cargarAutoSeleccionado() {
         int filaSeleccionada = tablaAutos.getSelectedRow();
         if (filaSeleccionada >= 0) {
-            String numeroChasis = (String) modeloTabla.getValueAt(filaSeleccionada, 4);
-            Auto auto = gestor.getAutos().stream()
-                    .filter(a -> a.getNumeroChasis().equals(numeroChasis))
-                    .findFirst().orElse(null);
+            List<Auto> autos = gestor.getAutos();
+            autoSeleccionado = autos.get(filaSeleccionada);
 
-            if (auto != null) {
-                txtModelo.setText(auto.getModelo());
-                txtChasis.setText(auto.getChasis());
-                txtMotor.setText(auto.getMotor());
-                txtAño.setText(String.valueOf(auto.getAño()));
-                txtNumeroChasis.setText(auto.getNumeroChasis());
-                txtPeso.setText(String.valueOf(auto.getPeso()));
-                txtPotencia.setText(String.valueOf(auto.getPotencia()));
+            txtModelo.setText(autoSeleccionado.getModelo());
+            txtChasis.setText(autoSeleccionado.getChasis());
+            txtMotor.setText(autoSeleccionado.getMotor());
+            txtAño.setText(String.valueOf(autoSeleccionado.getAño()));
+            txtNumeroChasis.setText(autoSeleccionado.getNumeroChasis());
+            txtPeso.setText(String.valueOf(autoSeleccionado.getPeso()));
+            txtPotencia.setText(String.valueOf(autoSeleccionado.getPotencia()));
+
+            // Buscar la escudería asignada
+            String escuderiaAsignada = "Sin asignar";
+            List<Escuderia> escuderias = gestor.getEscuderias();
+            for (Escuderia escuderia : escuderias) {
+                if (escuderia.getAutos().contains(autoSeleccionado)) {
+                    escuderiaAsignada = escuderia.getNombre();
+                    break;
+                }
             }
+            cmbEscuderia.setSelectedItem(escuderiaAsignada);
         }
     }
 
     /**
-     * Agrega un nuevo auto
+     * Crea un nuevo auto libre
      */
-    private void agregarAuto() {
+    private void crearAutoLibre() {
         try {
-            validarCampos();
+            validarCamposAuto();
 
             String modelo = txtModelo.getText().trim();
             String chasis = txtChasis.getText().trim();
@@ -285,124 +298,178 @@ public class VentanaAutos extends JFrame {
             Auto nuevoAuto = new Auto(modelo, chasis, motor, año, numeroChasis, peso, potencia);
             gestor.registrarAuto(nuevoAuto);
 
-            actualizarTablaAutos();
+            JOptionPane.showMessageDialog(this,
+                    "Auto creado exitosamente como libre (sin asignar).",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
+
             limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this, "Auto agregado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            actualizarTablaAutos();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
+            JOptionPane.showMessageDialog(this,
+                    "Error en los datos numéricos. Verifique año, peso y potencia.",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al agregar auto: " + e.getMessage(), "Error",
+            JOptionPane.showMessageDialog(this,
+                    "Error al crear el auto: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
-     * Modifica el auto seleccionado
+     * Asigna un auto libre a una escudería
      */
-    private void modificarAuto() {
-        int filaSeleccionada = tablaAutos.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un auto para modificar", "Advertencia",
+    private void asignarAutoAEscuderia() {
+        if (autoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar un auto de la tabla.",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        try {
-            validarCampos();
+        String escuderiaSeleccionada = (String) cmbEscuderia.getSelectedItem();
+        if (escuderiaSeleccionada == null || escuderiaSeleccionada.equals("Sin asignar")) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar una escudería.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-            String numeroChasisOriginal = (String) modeloTabla.getValueAt(filaSeleccionada, 4);
-            Auto auto = gestor.getAutos().stream()
-                    .filter(a -> a.getNumeroChasis().equals(numeroChasisOriginal))
-                    .findFirst().orElse(null);
+        // Verificar si el auto ya está asignado
+        if (estaAutoAsignado(autoSeleccionado)) {
+            JOptionPane.showMessageDialog(this,
+                    "El auto ya está asignado a una escudería.",
+                    "Advertencia",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-            if (auto != null) {
-                auto.setModelo(txtModelo.getText().trim());
-                auto.setChasis(txtChasis.getText().trim());
-                auto.setMotor(txtMotor.getText().trim());
-                auto.setAño(Integer.parseInt(txtAño.getText().trim()));
+        // Buscar la escudería
+        Escuderia escuderia = buscarEscuderiaPorNombre(escuderiaSeleccionada);
+        if (escuderia != null) {
+            escuderia.agregarAuto(autoSeleccionado);
 
-                // Verificar cambio de número de chasis
-                String nuevoNumeroChasis = txtNumeroChasis.getText().trim();
-                if (!nuevoNumeroChasis.equals(auto.getNumeroChasis())) {
-                    // Verificar que el nuevo número no esté ocupado
-                    boolean numeroOcupado = gestor.getAutos().stream()
-                            .anyMatch(a -> a.getNumeroChasis().equals(nuevoNumeroChasis));
-                    if (numeroOcupado) {
-                        throw new IllegalArgumentException(
-                                "El número de chasis " + nuevoNumeroChasis + " ya está ocupado");
-                    }
-                    auto.setNumeroChasis(nuevoNumeroChasis);
-                }
+            JOptionPane.showMessageDialog(this,
+                    "Auto asignado exitosamente a " + escuderia.getNombre() + ".",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
 
-                auto.setPeso(Double.parseDouble(txtPeso.getText().trim()));
-                auto.setPotencia(Integer.parseInt(txtPotencia.getText().trim()));
-
-                actualizarTablaAutos();
-                JOptionPane.showMessageDialog(this, "Auto modificado exitosamente", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese valores numéricos válidos", "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al modificar auto: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            actualizarTablaAutos();
         }
     }
 
     /**
-     * Elimina el auto seleccionado
+     * Desasigna un auto de su escudería actual
      */
-    private void eliminarAuto() {
-        int filaSeleccionada = tablaAutos.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un auto para eliminar", "Advertencia",
+    private void desasignarAutoDeEscuderia() {
+        if (autoSeleccionado == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Debe seleccionar un auto de la tabla.",
+                    "Advertencia",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Verificar si el auto está en uso en alguna carrera
-        String numeroChasis = (String) modeloTabla.getValueAt(filaSeleccionada, 4);
-        Auto auto = gestor.getAutos().stream()
-                .filter(a -> a.getNumeroChasis().equals(numeroChasis))
-                .findFirst().orElse(null);
+        // Buscar la escudería a la que está asignado el auto
+        Escuderia escuderiaAsignada = null;
+        List<Escuderia> escuderias = gestor.getEscuderias();
 
-        if (auto != null) {
-            // Verificar si está en uso en carreras
-            boolean enUso = gestor.getGrandesPremios().stream()
-                    .flatMap(gp -> gp.getParticipaciones().stream())
-                    .anyMatch(p -> p.getAuto().equals(auto));
-
-            if (enUso) {
-                JOptionPane.showMessageDialog(this,
-                        "No se puede eliminar el auto porque está siendo utilizado en carreras",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getAutos().contains(autoSeleccionado)) {
+                escuderiaAsignada = escuderia;
+                break;
             }
+        }
+
+        if (escuderiaAsignada == null) {
+            JOptionPane.showMessageDialog(this,
+                    "El auto no está asignado a ninguna escudería.",
+                    "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
         }
 
         int confirmacion = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro que desea eliminar este auto?",
-                "Confirmar eliminación",
+                "¿Está seguro de desasignar el auto de " + escuderiaAsignada.getNombre() + "?",
+                "Confirmar Desasignación",
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmacion == JOptionPane.YES_OPTION) {
-            if (auto != null) {
-                // Remover de escuderías
-                for (Escuderia escuderia : gestor.getEscuderias()) {
-                    escuderia.getAutos().remove(auto);
-                }
+            escuderiaAsignada.removerAuto(autoSeleccionado);
 
-                gestor.getAutos().remove(auto);
-                actualizarTablaAutos();
-                limpiarFormulario();
+            JOptionPane.showMessageDialog(this,
+                    "Auto desasignado exitosamente de " + escuderiaAsignada.getNombre() + ".",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
 
-                JOptionPane.showMessageDialog(this, "Auto eliminado exitosamente", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
+            cmbEscuderia.setSelectedItem("Sin asignar");
+            actualizarTablaAutos();
+        }
+    }
+
+    /**
+     * Verifica si un auto está asignado a alguna escudería
+     */
+    private boolean estaAutoAsignado(Auto auto) {
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getAutos().contains(auto)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Busca una escudería por su nombre
+     */
+    private Escuderia buscarEscuderiaPorNombre(String nombre) {
+        List<Escuderia> escuderias = gestor.getEscuderias();
+        for (Escuderia escuderia : escuderias) {
+            if (escuderia.getNombre().equals(nombre)) {
+                return escuderia;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Valida los campos del formulario de auto
+     */
+    private void validarCamposAuto() {
+        if (txtModelo.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El modelo es obligatorio");
+        }
+        if (txtChasis.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El chasis es obligatorio");
+        }
+        if (txtMotor.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El motor es obligatorio");
+        }
+        if (txtAño.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El año es obligatorio");
+        }
+        if (txtNumeroChasis.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El número de chasis es obligatorio");
+        }
+        if (txtPeso.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El peso es obligatorio");
+        }
+        if (txtPotencia.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("La potencia es obligatoria");
+        }
+
+        // Validar que el número de chasis sea único
+        String numeroChasis = txtNumeroChasis.getText().trim();
+        List<Auto> autos = gestor.getAutos();
+        for (Auto auto : autos) {
+            if (auto.getNumeroChasis().equals(numeroChasis) && auto != autoSeleccionado) {
+                throw new IllegalArgumentException("Ya existe un auto con ese número de chasis");
             }
         }
     }
@@ -418,57 +485,8 @@ public class VentanaAutos extends JFrame {
         txtNumeroChasis.setText("");
         txtPeso.setText("");
         txtPotencia.setText("");
+        cmbEscuderia.setSelectedIndex(0);
+        autoSeleccionado = null;
         tablaAutos.clearSelection();
-    }
-
-    /**
-     * Valida los campos del formulario
-     */
-    private void validarCampos() {
-        if (txtModelo.getText().trim().isEmpty() ||
-                txtChasis.getText().trim().isEmpty() ||
-                txtMotor.getText().trim().isEmpty() ||
-                txtAño.getText().trim().isEmpty() ||
-                txtNumeroChasis.getText().trim().isEmpty() ||
-                txtPeso.getText().trim().isEmpty() ||
-                txtPotencia.getText().trim().isEmpty()) {
-
-            throw new IllegalArgumentException("Todos los campos son obligatorios");
-        }
-
-        try {
-            int año = Integer.parseInt(txtAño.getText().trim());
-            if (año < 1950 || año > 2030) {
-                throw new IllegalArgumentException("El año debe estar entre 1950 y 2030");
-            }
-
-            double peso = Double.parseDouble(txtPeso.getText().trim());
-            if (peso < 500 || peso > 1000) {
-                throw new IllegalArgumentException("El peso debe estar entre 500 y 1000 kg");
-            }
-
-            int potencia = Integer.parseInt(txtPotencia.getText().trim());
-            if (potencia < 500 || potencia > 2000) {
-                throw new IllegalArgumentException("La potencia debe estar entre 500 y 2000 HP");
-            }
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Los campos numéricos deben contener valores válidos");
-        }
-    }
-
-    /**
-     * Aplica estilo moderno a los botones con alta visibilidad
-     */
-    private void aplicarEstiloBoton(JButton boton) {
-        // Tamaño estándar para todos los botones
-        boton.setPreferredSize(new Dimension(120, 40));
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
-
-        // Interfaz simple blanco y negro
-        boton.setBackground(Color.WHITE);
-        boton.setForeground(Color.BLACK);
-        boton.setBorder(BorderFactory.createRaisedBevelBorder());
-        boton.setFocusPainted(true);
     }
 }

@@ -1,7 +1,10 @@
 package controlador;
 
 import modelo.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +47,9 @@ public class GestorFormula1 {
     /** Lista de eventos de carrera programados */
     private List<GranPremio> grandesPremios;
 
+    /** Lista de relaciones piloto-escudería con fechas */
+    private List<PilotoEscuderia> pilotoEscuderias;
+
     /**
      * Constructor que inicializa todas las colecciones del sistema.
      * <p>
@@ -63,6 +69,7 @@ public class GestorFormula1 {
         this.mecanicos = new ArrayList<>();
         this.circuitos = new ArrayList<>();
         this.grandesPremios = new ArrayList<>();
+        this.pilotoEscuderias = new ArrayList<>();
     }
 
     // ==================== MÉTODOS DE REGISTRO ====================
@@ -567,9 +574,19 @@ public class GestorFormula1 {
      * correctas
      * 
      * @param granPremio Gran Premio a finalizar
-     * @throws IllegalStateException si hay inconsistencias en las posiciones
+     * @throws IllegalArgumentException si el granPremio es null
+     * @throws IllegalStateException    si hay inconsistencias en las posiciones o
+     *                                  la carrera ya está finalizada
      */
     public void finalizarCarrera(GranPremio granPremio) {
+        if (granPremio == null) {
+            throw new IllegalArgumentException("El Gran Premio no puede ser null");
+        }
+
+        if (granPremio.isFinalizada()) {
+            throw new IllegalStateException("La carrera ya está finalizada");
+        }
+
         if (!ValidadorFormula1.validarPosicionesUnicas(granPremio)) {
             throw new IllegalStateException(
                     "Las posiciones de la carrera tienen inconsistencias (duplicados o huecos)");
@@ -693,5 +710,149 @@ public class GestorFormula1 {
 
         // Agregar a la nueva escudería
         nuevaEscuderia.agregarPiloto(piloto);
+    }
+
+    // ==================== MÉTODOS DE GESTIÓN PILOTO-ESCUDERÍA ====================
+
+    /**
+     * Asigna un piloto a una escudería con fechas específicas.
+     * 
+     * @param piloto      Piloto a asignar
+     * @param escuderia   Escudería de destino
+     * @param fechaInicio Fecha de inicio en formato String
+     * @param fechaFin    Fecha de fin en formato String (null si es indefinido)
+     * @throws IllegalArgumentException si algún parámetro es inválido
+     */
+    public void asignarPilotoAEscuderia(Piloto piloto, Escuderia escuderia, String fechaInicio, String fechaFin) {
+        if (piloto == null) {
+            throw new IllegalArgumentException("El piloto no puede ser null");
+        }
+        if (escuderia == null) {
+            throw new IllegalArgumentException("La escudería no puede ser null");
+        }
+        if (fechaInicio == null || fechaInicio.trim().isEmpty()) {
+            throw new IllegalArgumentException("La fecha de inicio no puede estar vacía");
+        }
+
+        // Finalizar relación activa actual si existe
+        finalizarRelacionActivaPiloto(piloto, fechaInicio);
+
+        // Crear nueva relación
+        PilotoEscuderia relacion = new PilotoEscuderia(fechaInicio, fechaFin, piloto, escuderia);
+        pilotoEscuderias.add(relacion);
+
+        // Actualizar referencias
+        piloto.setEscuderia(escuderia);
+        if (!escuderia.getPilotos().contains(piloto)) {
+            escuderia.agregarPiloto(piloto);
+        }
+    }
+
+    /**
+     * Finaliza la relación activa actual de un piloto.
+     * 
+     * @param piloto   Piloto cuya relación se va a finalizar
+     * @param fechaFin Fecha de finalización
+     */
+    public void finalizarRelacionActivaPiloto(Piloto piloto, String fechaFin) {
+        for (PilotoEscuderia relacion : pilotoEscuderias) {
+            if (relacion.getPiloto().equals(piloto) && relacion.estaActiva()) {
+                relacion.finalizarRelacion(fechaFin);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Obtiene todas las relaciones piloto-escudería.
+     * 
+     * @return Lista de todas las relaciones
+     */
+    public List<PilotoEscuderia> getPilotoEscuderias() {
+        return new ArrayList<>(pilotoEscuderias);
+    }
+
+    /**
+     * Obtiene las relaciones vigentes de un piloto (contratos que no han expirado).
+     * 
+     * @param piloto Piloto del cual obtener relaciones
+     * @return Lista de relaciones vigentes
+     */
+    public List<PilotoEscuderia> getRelacionesActivasPiloto(Piloto piloto) {
+        return pilotoEscuderias.stream()
+                .filter(relacion -> relacion.getPiloto().equals(piloto) && relacion.estaVigente())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene el historial completo de un piloto.
+     * 
+     * @param piloto Piloto del cual obtener el historial
+     * @return Lista de todas las relaciones del piloto
+     */
+    public List<PilotoEscuderia> getHistorialPiloto(Piloto piloto) {
+        return pilotoEscuderias.stream()
+                .filter(relacion -> relacion.getPiloto().equals(piloto))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene los pilotos actuales de una escudería con sus fechas (solo contratos
+     * vigentes).
+     * 
+     * @param escuderia Escudería de la cual obtener pilotos
+     * @return Lista de relaciones vigentes de la escudería
+     */
+    public List<PilotoEscuderia> getPilotosEscuderiaConFechas(Escuderia escuderia) {
+        return pilotoEscuderias.stream()
+                .filter(relacion -> relacion.getEscuderia().equals(escuderia) && relacion.estaVigente())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene la lista de pilotos que están libres (sin contrato vigente).
+     * 
+     * @return Lista de pilotos sin escudería actual
+     */
+    public List<Piloto> getPilotosLibres() {
+        return pilotos.stream()
+                .filter(piloto -> getRelacionesActivasPiloto(piloto).isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene la escudería actual de un piloto (solo si tiene contrato vigente).
+     * 
+     * @param piloto Piloto del cual obtener la escudería
+     * @return Escudería actual o null si está libre
+     */
+    public Escuderia getEscuderiaActual(Piloto piloto) {
+        List<PilotoEscuderia> relaciones = getRelacionesActivasPiloto(piloto);
+        return relaciones.isEmpty() ? null : relaciones.get(0).getEscuderia();
+    }
+
+    /**
+     * Actualiza las referencias de pilotos en escuderías basándose en contratos
+     * vigentes.
+     * Limpia automáticamente pilotos con contratos expirados.
+     */
+    public void actualizarEscuderiasSegunContratos() {
+        // Limpiar todas las listas de pilotos en escuderías
+        for (Escuderia escuderia : escuderias) {
+            escuderia.getPilotos().clear();
+        }
+
+        // Limpiar referencias de escuderías en pilotos
+        for (Piloto piloto : pilotos) {
+            piloto.setEscuderia(null);
+        }
+
+        // Restablecer solo las relaciones vigentes
+        for (PilotoEscuderia relacion : pilotoEscuderias) {
+            if (relacion.estaVigente()) {
+                relacion.getPiloto().setEscuderia(relacion.getEscuderia());
+                relacion.getEscuderia().agregarPiloto(relacion.getPiloto());
+            }
+        }
     }
 }

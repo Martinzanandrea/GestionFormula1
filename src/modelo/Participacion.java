@@ -144,7 +144,9 @@ public class Participacion {
 
     @Override
     public String toString() {
-        return piloto.getNombreCompleto() + " - " + auto.getModelo() + " - " + getResultado();
+        String pilotoStr = piloto != null ? piloto.getNombreCompleto() : "Sin piloto";
+        String autoStr = auto != null ? auto.getModelo() : "Sin auto";
+        return pilotoStr + " - " + autoStr + " - " + getResultado();
     }
 
     @Override
@@ -154,11 +156,13 @@ public class Participacion {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Participacion that = (Participacion) obj;
-        return piloto.equals(that.piloto) && granPremio.equals(that.granPremio);
+        return piloto != null && piloto.equals(that.piloto) &&
+                granPremio != null && granPremio.equals(that.granPremio);
     }
 
     @Override
     public int hashCode() {
-        return (piloto.toString() + granPremio.toString()).hashCode();
+        return ((piloto != null ? piloto.toString() : "") +
+                (granPremio != null ? granPremio.toString() : "")).hashCode();
     }
 }
